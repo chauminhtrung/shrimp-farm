@@ -1,5 +1,6 @@
 package com.shrimpfarm.backend.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -17,9 +18,7 @@ public class Pond {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+
 
     @Column(nullable = false)
     private String name;
@@ -37,15 +36,24 @@ public class Pond {
         createdAt = LocalDateTime.now();
     }
 
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "pond", cascade = CascadeType.ALL)
     private List<Device> devices;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "pond", cascade = CascadeType.ALL)
     private List<SensorData> sensorDataList;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "pond", cascade = CascadeType.ALL)
     private List<Prediction> predictions;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "pond", cascade = CascadeType.ALL)
     private List<Alert> alerts;
 }
