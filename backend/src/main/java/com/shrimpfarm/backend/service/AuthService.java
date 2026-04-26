@@ -45,6 +45,11 @@ public class AuthService {
         User user = userRepository.findByUsername(req.getUsername())
                 .orElseThrow(() -> new RuntimeException("Username không tồn tại"));
 
+        System.out.println("=== DEBUG ===");
+        System.out.println("Input password: " + req.getPassword());
+        System.out.println("DB password: " + user.getPassword());
+        System.out.println("Match: " + passwordEncoder.matches(req.getPassword(), user.getPassword()));
+
         if (!passwordEncoder.matches(req.getPassword(), user.getPassword()))
             throw new RuntimeException("Mật khẩu không đúng");
 
