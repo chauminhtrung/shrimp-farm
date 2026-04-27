@@ -6,7 +6,6 @@ import RegisterPage from './pages/RegisterPage';
 import PondListPage from './pages/PondListPage';
 import PondDetailPage from './pages/PondDetailPage';
 
-// Route chỉ vào được khi đã đăng nhập
 function PrivateRoute({ children }) {
     const { user } = useAuth();
     return user ? children : <Navigate to="/login" />;
