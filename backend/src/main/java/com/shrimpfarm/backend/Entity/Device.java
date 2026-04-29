@@ -21,6 +21,7 @@ public class Device {
     @JoinColumn(name = "pond_id", nullable = false)
     private Pond pond;
 
+    @Column(columnDefinition = "NVARCHAR(255)")
     private String name;
 
     @Enumerated(EnumType.STRING)

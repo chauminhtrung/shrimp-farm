@@ -1,11 +1,35 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 export default function PondCard({ pond, onDelete }) {
     const navigate = useNavigate();
+    const [sensor, setSensor] = useState(null);
 
-    const getStatusColor = (status) => {
-        if (status === 'DANGER') return '#E24B4A';
-        if (status === 'WARNING') return '#BA7517';
+    useEffect(() => {
+        const fetchSensor = async () => {
+            try {
+                const res = await api.get(`/api/sensor/latest/${pond.id}`);
+                setSensor(res.data);
+            } catch {
+                setSensor(null);
+            }
+        };
+        fetchSensor();
+    }, [pond.id]);
+
+    const getStatusInfo = () => {
+        if (!sensor) return { text: 'Chưa có dữ liệu', bg: '#f5f5f5', color: '#888' };
+        if (sensor.oxygen < 4.0 || sensor.ph > 8.5 || sensor.ph < 6.5)
+            return { text: 'Cảnh báo', bg: '#FAEEDA', color: '#854F0B' };
+        return { text: 'Bình thường', bg: '#E1F5EE', color: '#085041' };
+    };
+
+    const status = getStatusInfo();
+
+    const getValColor = (val, min, max) => {
+        if (!val) return '#1a1a1a';
+        if (val < min || val > max) return '#E24B4A';
         return '#1D9E75';
     };
 
@@ -20,25 +44,42 @@ export default function PondCard({ pond, onDelete }) {
                 </div>
                 <div style={{
                     ...styles.statusBadge,
-                    background: '#E1F5EE',
-                    color: '#085041'
+                    background: status.bg,
+                    color: status.color
                 }}>
-                    Bình thường
+                    {status.text}
                 </div>
             </div>
 
             <div style={styles.stats}>
                 <div style={styles.stat}>
                     <div style={styles.statLabel}>Nhiệt độ</div>
-                    <div style={styles.statVal}>-- °C</div>
+                    <div style={{
+                        ...styles.statVal,
+                        color: getValColor(sensor?.temperature, 25, 32)
+                    }}>
+                        {sensor?.temperature?.toFixed(1) ?? '--'}
+                        <span style={styles.unit}> °C</span>
+                    </div>
                 </div>
                 <div style={styles.stat}>
                     <div style={styles.statLabel}>pH</div>
-                    <div style={styles.statVal}>--</div>
+                    <div style={{
+                        ...styles.statVal,
+                        color: getValColor(sensor?.ph, 6.5, 8.5)
+                    }}>
+                        {sensor?.ph?.toFixed(1) ?? '--'}
+                    </div>
                 </div>
                 <div style={styles.stat}>
                     <div style={styles.statLabel}>Oxy</div>
-                    <div style={styles.statVal}>-- mg/L</div>
+                    <div style={{
+                        ...styles.statVal,
+                        color: getValColor(sensor?.oxygen, 4, 10)
+                    }}>
+                        {sensor?.oxygen?.toFixed(1) ?? '--'}
+                        <span style={styles.unit}> mg/L</span>
+                    </div>
                 </div>
             </div>
 
@@ -70,9 +111,7 @@ const styles = {
         background: '#fff',
         border: '1px solid #e8e8e8',
         borderRadius: '12px',
-        overflow: 'hidden',
-        transition: 'box-shadow 0.2s',
-        cursor: 'default'
+        overflow: 'hidden'
     },
     header: {
         display: 'flex',
@@ -86,15 +125,13 @@ const styles = {
         color: '#1a1a1a',
         marginBottom: '4px'
     },
-    location: {
-        fontSize: '12px',
-        color: '#888'
-    },
+    location: { fontSize: '12px', color: '#888' },
     statusBadge: {
         fontSize: '11px',
         padding: '3px 10px',
         borderRadius: '20px',
-        fontWeight: '500'
+        fontWeight: '500',
+        whiteSpace: 'nowrap'
     },
     stats: {
         display: 'grid',
@@ -114,8 +151,12 @@ const styles = {
     },
     statVal: {
         fontSize: '18px',
-        fontWeight: '500',
-        color: '#1a1a1a'
+        fontWeight: '500'
+    },
+    unit: {
+        fontSize: '11px',
+        fontWeight: '400',
+        color: '#888'
     },
     footer: {
         display: 'flex',
@@ -125,14 +166,8 @@ const styles = {
         background: '#f8f9fa',
         borderTop: '1px solid #f0f0f0'
     },
-    footerInfo: {
-        fontSize: '11px',
-        color: '#aaa'
-    },
-    actions: {
-        display: 'flex',
-        gap: '8px'
-    },
+    footerInfo: { fontSize: '11px', color: '#aaa' },
+    actions: { display: 'flex', gap: '8px' },
     detailBtn: {
         padding: '5px 12px',
         background: '#185FA5',

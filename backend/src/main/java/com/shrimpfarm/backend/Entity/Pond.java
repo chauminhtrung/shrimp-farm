@@ -20,9 +20,10 @@ public class Pond {
 
 
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "NVARCHAR(255)", nullable = false)
     private String name;
 
+    @Column(columnDefinition = "NVARCHAR(255)")
     private String location;
     private Double area;
     private Double width;

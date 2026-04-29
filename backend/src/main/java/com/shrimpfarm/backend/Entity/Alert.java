@@ -23,6 +23,7 @@ public class Alert {
     @JoinColumn(name = "pond_id", nullable = false)
     private Pond pond;
 
+    @Column(columnDefinition = "NVARCHAR(500)")
     private String message;
 
     @Enumerated(EnumType.STRING)

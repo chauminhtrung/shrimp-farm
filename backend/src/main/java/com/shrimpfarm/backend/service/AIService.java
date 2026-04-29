@@ -1,3 +1,4 @@
+// encoding: UTF-8
 package com.shrimpfarm.backend.service;
 
 import com.shrimpfarm.backend.Entity.Prediction;

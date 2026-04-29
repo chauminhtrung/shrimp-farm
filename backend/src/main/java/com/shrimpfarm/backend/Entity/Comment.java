@@ -27,7 +27,8 @@ public class Comment {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
+
+    @Column(columnDefinition = "NVARCHAR(500)",nullable = false)
     private String content;
 
     @Column(updatable = false)

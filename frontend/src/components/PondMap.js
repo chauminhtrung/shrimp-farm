@@ -28,24 +28,26 @@ export default function PondMap({ pondId, pond }) {
 
     useEffect(() => { fetchDevices(); }, [pondId]);
 
-    const addDevice = async (type) => {
-        try {
-            await api.post('/api/devices', {
-                pondId,
-                name: type === 'FAN'
-                    ? `Fan ${devices.filter(d => d.type === 'FAN').length + 1}`
-                    : `Sensor ${devices.filter(d => d.type === 'SENSOR').length + 1}`,
-                type,
-                posX: 0.5,
-                posY: 0.5,
-                status: 'OFF'
-            });
-            toast.success('Đã thêm thiết bị');
-            fetchDevices();
-        } catch {
-            toast.error('Thêm thiết bị thất bại');
-        }
-    };
+const addDevice = async (type) => {
+    try {
+        const fanCount = devices.filter(d => d.type === 'FAN').length + 1;
+        const sensorCount = devices.filter(d => d.type === 'SENSOR').length + 1;
+        await api.post('/api/devices', {
+            pondId,
+            name: type === 'FAN'
+                ? `Quạt oxy ${fanCount}`
+                : `Cảm biến ${sensorCount}`,
+            type,
+            posX: 0.5,
+            posY: 0.5,
+            status: 'OFF'
+        });
+        toast.success('Đã thêm thiết bị');
+        fetchDevices();
+    } catch {
+        toast.error('Thêm thiết bị thất bại');
+    }
+};
 
     const deleteDevice = async (id) => {
         try {
@@ -140,15 +142,17 @@ export default function PondMap({ pondId, pond }) {
                                     onClick={() => setSelectedDevice(
                                         isSelected ? null : device.id
                                     )}
-                                    onMouseEnter={(e) => {
-                                        const stage = e.target.getStage();
-                                        const pos = stage.getPointerPosition();
-                                        setTooltip({
-                                            x: pos.x,
-                                            y: pos.y - 36,
-                                            text: `${device.name} · ${device.status}`
-                                        });
-                                    }}
+                                onMouseEnter={(e) => {
+                                    const stage = e.target.getStage();
+                                    const pos = stage.getPointerPosition();
+                                    const statusText = device.status === 'ON' ? 'Đang bật' :
+                                                    device.status === 'OFF' ? 'Đang tắt' : 'Lỗi';
+                                    setTooltip({
+                                        x: pos.x,
+                                        y: pos.y - 36,
+                                        text: `${device.name} · ${statusText}`
+                                    });
+                                }}
                                     onMouseLeave={() => setTooltip(null)}
                                 >
                                     {isSelected && (

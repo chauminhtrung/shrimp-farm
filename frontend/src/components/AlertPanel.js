@@ -1,12 +1,13 @@
 export default function AlertPanel({ alerts, onMarkRead }) {
     const unread = alerts.filter(a => !a.isRead);
+    const read = alerts.filter(a => a.isRead);
 
     return (
         <div style={styles.card}>
             <div style={styles.header}>
                 <span style={styles.title}>🔔 Cảnh báo</span>
                 {unread.length > 0 && (
-                    <span style={styles.badge}>{unread.length} mới</span>
+                    <span style={styles.badge}>{unread.length} chưa đọc</span>
                 )}
             </div>
 
@@ -14,10 +15,14 @@ export default function AlertPanel({ alerts, onMarkRead }) {
                 <div style={styles.empty}>Không có cảnh báo nào</div>
             ) : (
                 <div style={styles.list}>
-                    {alerts.slice(0, 5).map(alert => (
+                    {/* Chưa đọc hiển thị trước */}
+                    {unread.map(alert => (
                         <div key={alert.id} style={{
                             ...styles.item,
-                            background: alert.isRead ? '#fafafa' : '#fff'
+                            background: '#fff',
+                            borderLeft: `3px solid ${
+                                alert.level === 'DANGER' ? '#E24B4A' : '#BA7517'
+                            }`
                         }}>
                             <div style={{
                                 ...styles.dot,
@@ -31,14 +36,41 @@ export default function AlertPanel({ alerts, onMarkRead }) {
                                         .toLocaleString('vi-VN')}
                                 </div>
                             </div>
-                            {!alert.isRead && (
-                                <button
-                                    style={styles.readBtn}
-                                    onClick={() => onMarkRead(alert.id)}
-                                >
-                                    ✓
-                                </button>
-                            )}
+                            <button
+                                style={styles.readBtn}
+                                onClick={() => onMarkRead(alert.id)}
+                                title="Đánh dấu đã đọc"
+                            >
+                                ✓
+                            </button>
+                        </div>
+                    ))}
+
+                    {/* Đã đọc hiển thị sau — mờ hơn */}
+                    {read.slice(0, 3).map(alert => (
+                        <div key={alert.id} style={{
+                            ...styles.item,
+                            background: '#fafafa',
+                            opacity: 0.6
+                        }}>
+                            <div style={{
+                                ...styles.dot,
+                                background: '#ccc'
+                            }} />
+                            <div style={styles.itemContent}>
+                                <div style={{
+                                    ...styles.msg,
+                                    color: '#999',
+                                    textDecoration: 'line-through'
+                                }}>
+                                    {alert.message}
+                                </div>
+                                <div style={styles.time}>
+                                    {new Date(alert.createdAt)
+                                        .toLocaleString('vi-VN')}
+                                </div>
+                            </div>
+                            <span style={styles.readTag}>Đã đọc</span>
                         </div>
                     ))}
                 </div>
@@ -69,7 +101,8 @@ const styles = {
     list: { display: 'flex', flexDirection: 'column', gap: '6px' },
     item: {
         display: 'flex', alignItems: 'flex-start', gap: '8px',
-        padding: '8px', borderRadius: '6px', border: '1px solid #f0f0f0'
+        padding: '8px 10px', borderRadius: '6px',
+        border: '1px solid #f0f0f0'
     },
     dot: {
         width: '7px', height: '7px', borderRadius: '50%',
@@ -79,8 +112,14 @@ const styles = {
     msg: { fontSize: '12px', color: '#333', lineHeight: 1.5 },
     time: { fontSize: '11px', color: '#bbb', marginTop: '2px' },
     readBtn: {
-        background: 'none', border: 'none',
+        background: '#E1F5EE', border: 'none',
         color: '#1D9E75', cursor: 'pointer',
-        fontSize: '14px', fontWeight: '600'
+        fontSize: '12px', fontWeight: '600',
+        padding: '2px 7px', borderRadius: '4px'
+    },
+    readTag: {
+        fontSize: '10px', color: '#bbb',
+        padding: '2px 6px', background: '#f5f5f5',
+        borderRadius: '4px', whiteSpace: 'nowrap'
     }
 };

@@ -26,6 +26,8 @@ public class Prediction {
     private RiskLevel riskLevel;
 
     private Integer riskPercent;
+
+    @Column(columnDefinition = "NVARCHAR(500)")
     private String recommendation;
 
     @Column(updatable = false)

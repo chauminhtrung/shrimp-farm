@@ -11,18 +11,33 @@ export default function PondListPage() {
     const [ponds, setPonds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-
+    const [totalAlerts, setTotalAlerts] = useState(0);
     // Load danh sách ao
-    const fetchPonds = async () => {
-        try {
-            const res = await api.get(`/api/ponds?userId=${user.userId}`);
-            setPonds(res.data);
-        } catch (err) {
-            toast.error('Không thể tải danh sách ao');
-        } finally {
-            setLoading(false);
-        }
-    };
+  const fetchPonds = async () => {
+    try {
+        const res = await api.get(`/api/ponds?userId=${user.userId}`);
+        setPonds(res.data);
+        fetchTotalAlerts(res.data); // thêm dòng này
+    } catch (err) {
+        toast.error('Không thể tải danh sách ao');
+    } finally {
+        setLoading(false);
+    }
+};
+    const fetchTotalAlerts = async (pondList) => {
+    try {
+        let total = 0;
+        await Promise.all(
+            pondList.map(async (pond) => {
+                const res = await api.get(`/api/alerts/unread?pondId=${pond.id}`);
+                total += res.data.length;
+            })
+        );
+        setTotalAlerts(total);
+    } catch {
+        setTotalAlerts(0);
+    }
+};
 
     useEffect(() => {
         fetchPonds();
@@ -81,7 +96,7 @@ export default function PondListPage() {
                     {[
                         { label: 'Tổng số ao', value: ponds.length, color: '#185FA5' },
                         { label: 'Đang hoạt động', value: ponds.length, color: '#1D9E75' },
-                        { label: 'Cảnh báo', value: 0, color: '#BA7517' },
+                        { label: 'Cảnh báo', value: totalAlerts, color: totalAlerts > 0 ? '#BA7517' : '#1D9E75' },
                     ].map((s, i) => (
                         <div key={i} style={styles.statCard}>
                             <div style={{...styles.statVal, color: s.color}}>{s.value}</div>

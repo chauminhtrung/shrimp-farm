@@ -27,6 +27,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(columnDefinition = "NVARCHAR(255)")
     private String fullName;
 
     @Enumerated(EnumType.STRING)
