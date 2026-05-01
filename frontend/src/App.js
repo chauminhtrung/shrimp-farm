@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import PondListPage from './pages/PondListPage';
 import PondDetailPage from './pages/PondDetailPage';
+import LandingPage from './pages/LandingPage';
 
 function PrivateRoute({ children }) {
     const { user } = useAuth();
@@ -17,6 +18,7 @@ function App() {
             <BrowserRouter>
                 <Toaster position="top-right" />
                 <Routes>
+                    <Route path="/" element={<LandingPage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/ponds" element={
@@ -25,7 +27,6 @@ function App() {
                     <Route path="/ponds/:id" element={
                         <PrivateRoute><PondDetailPage /></PrivateRoute>
                     } />
-                    <Route path="/" element={<Navigate to="/ponds" />} />
                 </Routes>
             </BrowserRouter>
         </AuthProvider>
