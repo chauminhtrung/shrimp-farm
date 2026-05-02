@@ -42,8 +42,10 @@ public class PostController {
 
     // PUT /api/posts/1/like — thích bài viết
     @PutMapping("/{id}/like")
-    public ResponseEntity<Post> likePost(@PathVariable Long id) {
-        return ResponseEntity.ok(postService.likePost(id));
+    public ResponseEntity<Post> likePost(
+            @PathVariable Long id,
+            @RequestParam Long userId) {
+        return ResponseEntity.ok(postService.toggleLike(id, userId));
     }
 
     // DELETE /api/posts/1
@@ -52,4 +54,11 @@ public class PostController {
         postService.deletePost(id);
         return ResponseEntity.noContent().build();
     }
+
+    // Chỉ Admin mới duyệt được
+    @PutMapping("/{id}/approve")
+    public ResponseEntity<Post> approve(@PathVariable Long id) {
+        return ResponseEntity.ok(postService.approvePost(id));
+    }
+
 }

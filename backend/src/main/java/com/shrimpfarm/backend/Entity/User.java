@@ -36,6 +36,9 @@ public class User {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String avatarUrl;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

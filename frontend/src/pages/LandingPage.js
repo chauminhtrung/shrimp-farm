@@ -39,7 +39,7 @@ export default function LandingPage() {
     ];
 
     const stats = [
-        { value: '30s', label: 'Cập nhật dữ liệu' },
+        { value: '15s', label: 'Cập nhật dữ liệu' },
         { value: '24/7', label: 'Giám sát liên tục' },
         { value: 'AI', label: 'Dự đoán thông minh' },
         { value: '100%', label: 'Miễn phí' },

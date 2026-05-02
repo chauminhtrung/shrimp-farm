@@ -8,12 +8,18 @@ import java.util.List;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    // Lấy tất cả bài viết mới nhất
-    List<Post> findAllByOrderByCreatedAtDesc();
-
     // Lọc theo tag
     List<Post> findByTagOrderByCreatedAtDesc(Post.PostTag tag);
 
     // Tìm kiếm theo tiêu đề
     List<Post> findByTitleContainingIgnoreCaseOrderByCreatedAtDesc(String keyword);
+
+    List<Post> findByStatusOrderByCreatedAtDesc(Post.PostStatus status);
+
+    List<Post> findByTagAndStatusOrderByCreatedAtDesc(
+            Post.PostTag tag, Post.PostStatus status);
+
+    List<Post> findByTitleContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(
+            String keyword, Post.PostStatus status);
+
 }

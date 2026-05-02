@@ -1,24 +1,39 @@
 package com.shrimpfarm.backend.service;
 
 import com.shrimpfarm.backend.Entity.Post;
+import com.shrimpfarm.backend.Entity.PostLike;
 import com.shrimpfarm.backend.Entity.User;
 import com.shrimpfarm.backend.dto.PostDTO;
+import com.shrimpfarm.backend.repository.PostLikeRepository;
 import com.shrimpfarm.backend.repository.PostRepository;
 import com.shrimpfarm.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
+    @Autowired
+    private PostLikeRepository postLikeRepository;
     private final PostRepository postRepository;
+    @Autowired
     private final UserRepository userRepository;
 
-    // Lấy tất cả bài viết
     public List<Post> getAllPosts() {
-        return postRepository.findAllByOrderByCreatedAtDesc();
+        return postRepository.findByStatusOrderByCreatedAtDesc(
+                Post.PostStatus.APPROVED);
+    }
+
+
+    // Thêm hàm approve cho Admin
+    public Post approvePost(Long id) {
+        Post post = getPostById(id);
+        post.setStatus(Post.PostStatus.APPROVED);
+        return postRepository.save(post);
     }
 
     // Lọc theo tag
@@ -55,9 +70,25 @@ public class PostService {
     }
 
     // Thích bài viết
-    public Post likePost(Long id) {
-        Post post = getPostById(id);
-        post.setLikes(post.getLikes() + 1);
+    public Post toggleLike(Long postId, Long userId) {
+        Post post = getPostById(postId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Optional<PostLike> existing = postLikeRepository
+                .findByPostIdAndUserId(postId, userId);
+
+        if (existing.isPresent()) {
+            // Đã like → bỏ like
+            postLikeRepository.delete(existing.get());
+            post.setLikes(Math.max(0, post.getLikes() - 1));
+        } else {
+            // Chưa like → thêm like
+            PostLike like = PostLike.builder()
+                    .post(post).user(user).build();
+            postLikeRepository.save(like);
+            post.setLikes(post.getLikes() + 1);
+        }
         return postRepository.save(post);
     }
 
@@ -65,4 +96,7 @@ public class PostService {
     public void deletePost(Long id) {
         postRepository.deleteById(id);
     }
+
+
+
 }

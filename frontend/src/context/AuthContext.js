@@ -8,11 +8,11 @@ export function AuthProvider({ children }) {
         return saved ? JSON.parse(saved) : null;
     });
 
-    const login = (userData, token) => {
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(userData));
-        setUser(userData);
-    };
+        const login = (userData, token) => {
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(userData));
+            setUser(userData);
+        };
 
     const logout = () => {
         localStorage.removeItem('token');

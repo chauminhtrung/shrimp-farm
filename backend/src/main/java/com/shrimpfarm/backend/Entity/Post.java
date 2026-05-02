@@ -48,4 +48,17 @@ public class Post {
     public enum PostTag {
         EXPERIENCE, DISEASE, TECHNIQUE, QA
     }
+    @Enumerated(EnumType.STRING)
+    private PostStatus status = PostStatus.PENDING;
+
+    @Column(columnDefinition = "NVARCHAR(500)")
+    private String imageUrl;
+
+    public enum PostStatus {
+        PENDING,   // chờ duyệt
+        APPROVED,  // đã duyệt
+        REJECTED   // từ chối
+    }
+
+
 }
