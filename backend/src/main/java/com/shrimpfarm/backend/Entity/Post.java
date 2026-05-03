@@ -48,8 +48,11 @@ public class Post {
     public enum PostTag {
         EXPERIENCE, DISEASE, TECHNIQUE, QA
     }
+
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "NVARCHAR(20)")
     private PostStatus status = PostStatus.PENDING;
+
 
     @Column(columnDefinition = "NVARCHAR(500)")
     private String imageUrl;

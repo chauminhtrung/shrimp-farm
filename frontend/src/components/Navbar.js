@@ -54,6 +54,21 @@ export default function Navbar() {
         {getAvatarLetter(user)}
     </div>
 )}
+
+{user?.role === 'ADMIN' && (
+    <span
+        style={{
+            fontSize: '12px', padding: '4px 10px',
+            background: '#FAEEDA', color: '#7F4F00',
+            borderRadius: '6px', cursor: 'pointer',
+            fontWeight: '500', marginRight: '4px'
+        }}
+        onClick={() => navigate('/admin')}
+    >
+        👑 Admin
+    </span>
+)}
+
               
                 <button style={styles.logoutBtn} onClick={handleLogout}>
                     Đăng xuất

@@ -36,6 +36,12 @@ public class PostService {
         return postRepository.save(post);
     }
 
+    public Post rejectPost(Long id) {
+        Post post = getPostById(id);
+        post.setStatus(Post.PostStatus.REJECTED);
+        return postRepository.save(post);
+    }
+
     // Lọc theo tag
     public List<Post> getPostsByTag(Post.PostTag tag) {
         return postRepository.findByTagOrderByCreatedAtDesc(tag);

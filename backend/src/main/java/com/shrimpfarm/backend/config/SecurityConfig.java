@@ -38,7 +38,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/sensor/**").permitAll()
                         .requestMatchers("/api/predict/**").permitAll()
                         .requestMatchers("/api/alerts/**").permitAll()
+                        .requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

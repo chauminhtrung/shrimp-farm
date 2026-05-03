@@ -44,6 +44,9 @@ public class User {
         createdAt = LocalDateTime.now();
     }
 
+    private Boolean locked = false;
+
+
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Pond> ponds;

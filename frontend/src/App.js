@@ -9,6 +9,8 @@ import LandingPage from './pages/LandingPage';
 import CommunityPage from './pages/CommunityPage';
 import PostDetailPage from './pages/PostDetailPage';
 import ProfilePage from './pages/ProfilePage';
+import AdminPage from './pages/AdminPage';
+
 
 function PrivateRoute({ children }) {
     const { user } = useAuth();
@@ -36,6 +38,16 @@ function App() {
                     <Route path="/ponds/:id" element={
                         <PrivateRoute><PondDetailPage /></PrivateRoute>
                     } />
+
+                    // Thêm route — chỉ Admin mới vào được
+                    <Route path="/admin" element={
+                        <PrivateRoute><AdminPage /></PrivateRoute>
+                    } />
+
+
+
+
+
                 </Routes>
             </BrowserRouter>
         </AuthProvider>
