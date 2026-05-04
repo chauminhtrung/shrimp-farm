@@ -8,11 +8,14 @@ export function AuthProvider({ children }) {
         return saved ? JSON.parse(saved) : null;
     });
 
-        const login = (userData, token) => {
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(userData));
-            setUser(userData);
-        };
+   const login = (userData, token) => {
+        // Merge với data cũ để không mất field nào
+        const existing = JSON.parse(localStorage.getItem('user') || '{}');
+        const merged = { ...existing, ...userData };
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(merged));
+        setUser(merged);
+    };
 
     const logout = () => {
         localStorage.removeItem('token');

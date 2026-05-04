@@ -4,7 +4,8 @@ import api from '../services/api';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import CommunityNavbar from '../components/CommunityNavbar';
-
+import { getAvatarColor, getAvatarLetter, getAvatarSrc } from '../utils/avatarHelper';
+import Avatar from '../components/Avatar';
 const TAG_MAP = {
     EXPERIENCE: { label: 'Kinh nghiệm', bg: '#E6F1FB', color: '#185FA5' },
     DISEASE:    { label: 'Bệnh tôm',    bg: '#FCEBEB', color: '#C62828' },
@@ -107,16 +108,21 @@ export default function PostDetailPage() {
                 <div style={styles.postCard}>
                     <div style={styles.postHeader}>
                         <div style={styles.authorRow}>
-                            <div style={styles.avatar}>
-                                {post?.user?.username?.[0]?.toUpperCase()}
-                            </div>
+                <Avatar
+                    user={{
+                        username: post.username,
+                        fullName: post.fullName,
+                        avatarUrl: post.avatarUrl
+                    }}
+                    size={34}
+                />
                             <div>
-                                <div style={styles.authorName}>
-                                    {post?.user?.fullName || post?.user?.username}
-                                </div>
-                                <div style={styles.postTime}>
-                                    {timeAgo(post?.createdAt)}
-                                </div>
+                    <div style={styles.authorName}>
+                        {post.fullName || post.username}
+                    </div>
+                    <div style={styles.postTime}>
+                        {timeAgo(post.createdAt)}
+                    </div>
                             </div>
                         </div>
                         <span style={{
@@ -126,21 +132,20 @@ export default function PostDetailPage() {
                         }}>
                             {tag.label}
                         </span>
-                        // Trong postCard — thêm sau tagBadge
-                    {post.imageUrl && (
-                        <img
-                            src={post.imageUrl}
-                            alt="post"
-                            style={{
-                                width: '100%', height: '180px',
-                                objectFit: 'cover', borderRadius: '8px',
-                                marginBottom: '10px'
-                            }}
-                            onError={e => e.target.style.display = 'none'}
-                        />
-                    )}
                     </div>
-
+                {/* Ảnh bài viết */}
+                {post?.imageUrl && (
+                    <img
+                        src={post.imageUrl}
+                        alt="post"
+                        style={{
+                            width: '100%', maxHeight: '300px',
+                            objectFit: 'cover', borderRadius: '8px',
+                            marginBottom: '16px'
+                        }}
+                        onError={e => e.target.style.display = 'none'}
+                    />
+                )}
                     <h1 style={styles.postTitle}>{post?.title}</h1>
                     <div style={styles.postContent}>{post?.content}</div>
 
@@ -168,6 +173,7 @@ export default function PostDetailPage() {
                                 background: user ? '#1D9E75' : '#ccc',
                                 flexShrink: 0
                             }}>
+                                
                                 {user?.username?.[0]?.toUpperCase() || '?'}
                             </div>
                             <input
@@ -203,20 +209,21 @@ export default function PostDetailPage() {
                         <div style={styles.commentList}>
                             {comments.map(cmt => (
                                 <div key={cmt.id} style={styles.commentItem}>
-                                    <div style={{
-                                        ...styles.avatar,
-                                        width: '32px', height: '32px',
-                                        fontSize: '12px', flexShrink: 0
-                                    }}>
-                                        {cmt.user?.username?.[0]?.toUpperCase()}
-                                    </div>
+                                <Avatar
+                                    user={{
+                                        username: cmt.username,
+                                        fullName: cmt.fullName,
+                                        avatarUrl: cmt.avatarUrl
+                                    }}
+                                    size={34}
+                                />
                                     <div style={styles.commentBody}>
                                         <div style={styles.commentHeader}>
                                             <span style={styles.commentAuthor}>
-                                                {cmt.user?.fullName || cmt.user?.username}
+                                                {cmt.fullName || cmt.username}
                                             </span>
                                             <span style={styles.commentTime}>
-                                                {timeAgo(cmt.createdAt)}
+                                                 {timeAgo(cmt.createdAt)}
                                             </span>
                                         </div>
                                         <div style={styles.commentText}>

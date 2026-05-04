@@ -2,6 +2,7 @@ package com.shrimpfarm.backend.controller;
 
 import com.shrimpfarm.backend.Entity.Post;
 import com.shrimpfarm.backend.Entity.User;
+import com.shrimpfarm.backend.dto.PostResponseDTO;
 import com.shrimpfarm.backend.repository.*;
 import com.shrimpfarm.backend.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -25,13 +26,16 @@ public class AdminController {
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getStats() {
         Map<String, Object> stats = new HashMap<>();
-        stats.put("totalUsers",    userRepository.count());
-        stats.put("totalPonds",    pondRepository.count());
-        stats.put("totalPosts",    postRepository.count());
-        stats.put("pendingPosts",  postRepository
+        stats.put("totalUsers",   userRepository.count());
+        stats.put("totalPonds",   pondRepository.count());
+        // Chỉ đếm bài đã APPROVED
+        stats.put("totalPosts",   postRepository
+                .findByStatusOrderByCreatedAtDesc(Post.PostStatus.APPROVED).size());
+        // Đếm riêng bài PENDING
+        stats.put("pendingPosts", postRepository
                 .findByStatusOrderByCreatedAtDesc(Post.PostStatus.PENDING).size());
-        stats.put("totalAlerts",   alertRepository.count());
-        stats.put("totalSensors",  sensorDataRepository.count());
+        stats.put("totalAlerts",  alertRepository.count());
+        stats.put("totalSensors", sensorDataRepository.count());
         return ResponseEntity.ok(stats);
     }
 
@@ -52,9 +56,11 @@ public class AdminController {
 
     // Danh sách bài chờ duyệt
     @GetMapping("/posts/pending")
-    public ResponseEntity<List<Post>> getPendingPosts() {
+    public ResponseEntity<List<PostResponseDTO>> getPendingPosts() {
         return ResponseEntity.ok(
                 postRepository.findByStatusOrderByCreatedAtDesc(Post.PostStatus.PENDING)
+                        .stream().map(postService::toDTO)
+                        .collect(java.util.stream.Collectors.toList())
         );
     }
 

@@ -10,24 +10,25 @@ export default function LoginPage() {
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            const res = await api.post('/api/auth/login', form);
-            login({
-                userId: res.data.userId,
-                username: res.data.username,
-                role: res.data.role
-            }, res.data.token);
-            toast.success('Đăng nhập thành công!');
-            navigate('/ponds');
-        } catch (err) {
-            toast.error('Sai tên đăng nhập hoặc mật khẩu!');
-        } finally {
-            setLoading(false);
-        }
-    };
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+        const res = await api.post('/api/auth/login', form);
+        login({
+            userId: res.data.userId,
+            username: res.data.username,
+            role: res.data.role,
+            avatarUrl: res.data.avatarUrl  // ← thêm dòng này
+        }, res.data.token);
+        toast.success('Đăng nhập thành công!');
+        navigate('/ponds');
+    } catch (err) {
+        toast.error('Sai tên đăng nhập hoặc mật khẩu!');
+    } finally {
+        setLoading(false);
+    }
+};
 
     return (
         <div style={styles.container}>

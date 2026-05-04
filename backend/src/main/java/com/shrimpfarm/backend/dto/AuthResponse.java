@@ -1,6 +1,4 @@
-// AuthResponse.java
 package com.shrimpfarm.backend.dto;
-
 import lombok.*;
 
 @Data
@@ -11,4 +9,5 @@ public class AuthResponse {
     private Long userId;
     private String username;
     private String role;
+    private String avatarUrl;  // ← thêm field này
 }

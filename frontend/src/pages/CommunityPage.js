@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import CommunityNavbar from '../components/CommunityNavbar';
 import CreatePostModal from '../components/CreatePostModal';
 import { getAvatarColor, getAvatarLetter, getAvatarSrc } from '../utils/avatarHelper';
+import Avatar from '../components/Avatar';
 const TAGS = [
     { key: null, label: '🌊 Tất cả' },
     { key: 'EXPERIENCE', label: '💡 Kinh nghiệm' },
@@ -182,40 +183,23 @@ export default function CommunityPage() {
                                         >
                                             <div style={styles.postHeader}>
                                                 <div style={styles.authorRow}>
-                                                    <div style={styles.avatar}>
-                                                                                      {getAvatarSrc(user) ? (
-                                       <img
-                                           src={getAvatarSrc(user)}
-                                           alt="avatar"
-                                           style={{
-                                               width: '30px', height: '30px',
-                                               borderRadius: '50%', objectFit: 'cover',
-                                               cursor: 'pointer', border: '2px solid rgba(255,255,255,0.5)'
-                                           }}
-                                           onClick={() => navigate('/profile')}
-                                       />
-                                   ) : (
-                                       <div
-                                           style={{
-                                               width: '30px', height: '30px', borderRadius: '50%',
-                                               background: getAvatarColor(user?.username),
-                                               color: '#fff', display: 'flex', alignItems: 'center',
-                                               justifyContent: 'center', fontSize: '13px',
-                                               fontWeight: '600', cursor: 'pointer'
-                                           }}
-                                           onClick={() => navigate('/profile')}
-                                       >
-                                           {getAvatarLetter(user)}
-                                       </div>
-                                   )}
-                                                    </div>
+                                            <div style={styles.avatar}>
+                                         <Avatar
+                                            user={{
+                                                username: post.username,
+                                                fullName: post.fullName,
+                                                avatarUrl: post.avatarUrl
+                                            }}
+                                            size={34}
+                                        />
+                                            </div>
                                                     <div>
-                                                        <div style={styles.authorName}>
-                                                            {post.user?.fullName || post.user?.username}
-                                                        </div>
-                                                        <div style={styles.postTime}>
-                                                            {timeAgo(post.createdAt)}
-                                                        </div>
+                                                <div style={styles.authorName}>
+                                                    {post.fullName || post.username}
+                                                </div>
+                                                <div style={styles.postTime}>
+                                                    {timeAgo(post.createdAt)}
+                                                </div>
                                                     </div>
                                                 </div>
                                                 <span style={{

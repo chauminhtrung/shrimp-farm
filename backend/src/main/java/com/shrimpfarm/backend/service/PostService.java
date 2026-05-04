@@ -4,6 +4,7 @@ import com.shrimpfarm.backend.Entity.Post;
 import com.shrimpfarm.backend.Entity.PostLike;
 import com.shrimpfarm.backend.Entity.User;
 import com.shrimpfarm.backend.dto.PostDTO;
+import com.shrimpfarm.backend.dto.PostResponseDTO;
 import com.shrimpfarm.backend.repository.PostLikeRepository;
 import com.shrimpfarm.backend.repository.PostRepository;
 import com.shrimpfarm.backend.repository.UserRepository;
@@ -70,6 +71,7 @@ public class PostService {
                 .content(dto.getContent())
                 .tag(dto.getTag())
                 .likes(0)
+                .status(Post.PostStatus.PENDING)
                 .build();
 
         return postRepository.save(post);
@@ -102,6 +104,46 @@ public class PostService {
     public void deletePost(Long id) {
         postRepository.deleteById(id);
     }
+
+    public PostResponseDTO toDTO(Post post) {
+        return PostResponseDTO.builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .tag(post.getTag() != null ? post.getTag().name() : null)
+                .likes(post.getLikes())
+                .status(post.getStatus() != null ? post.getStatus().name() : null)
+                .imageUrl(post.getImageUrl())
+                .createdAt(post.getCreatedAt())
+                .userId(post.getUser() != null ? post.getUser().getId() : null)
+                .username(post.getUser() != null ? post.getUser().getUsername() : null)
+                .fullName(post.getUser() != null ? post.getUser().getFullName() : null)
+                .avatarUrl(post.getUser() != null ? post.getUser().getAvatarUrl() : null)
+                .build();
+    }
+
+    public List<PostResponseDTO> getAllPostsDTO() {
+        return postRepository.findByStatusOrderByCreatedAtDesc(Post.PostStatus.APPROVED)
+                .stream().map(this::toDTO).collect(java.util.stream.Collectors.toList());
+    }
+
+    public List<PostResponseDTO> getPostsByTagDTO(Post.PostTag tag) {
+        return postRepository.findByTagAndStatusOrderByCreatedAtDesc(tag, Post.PostStatus.APPROVED)
+                .stream().map(this::toDTO).collect(java.util.stream.Collectors.toList());
+    }
+
+    public List<PostResponseDTO> searchPostsDTO(String keyword) {
+        return postRepository
+                .findByTitleContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(
+                        keyword, Post.PostStatus.APPROVED)
+                .stream().map(this::toDTO).collect(java.util.stream.Collectors.toList());
+    }
+
+    public PostResponseDTO getPostDTOById(Long id) {
+        return toDTO(getPostById(id));
+    }
+
+
 
 
 

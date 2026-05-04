@@ -5,7 +5,7 @@ import api from '../services/api';
 import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import { getAvatarColor, getAvatarLetter } from '../utils/avatarHelper';
-
+import Avatar from '../components/Avatar';
 const TABS = [
     { key: 'stats',   label: '📊 Thống kê' },
     { key: 'posts',   label: '📝 Duyệt bài' },
@@ -211,19 +211,22 @@ export default function AdminPage() {
                                         <div key={post.id} style={styles.postCard}>
                                             <div style={styles.postCardHeader}>
                                                 <div style={styles.authorRow}>
-                                                    <div style={{
-                                                        ...styles.avatar,
-                                                        background: getAvatarColor(post.user?.username)
-                                                    }}>
-                                                        {getAvatarLetter(post.user)}
-                                                    </div>
+                                                    <Avatar
+                                                user={{
+                                                    username: post.username,
+                                                    fullName: post.fullName,
+                                                    avatarUrl: post.avatarUrl,
+                                                    userId: post.userId
+                                                }}
+                                                size={36}
+                                            />
                                                     <div>
-                                                        <div style={styles.authorName}>
-                                                            {post.user?.fullName || post.user?.username}
-                                                        </div>
-                                                        <div style={styles.postTime}>
-                                                            {timeAgo(post.createdAt)}
-                                                        </div>
+                                                <div style={styles.authorName}>
+                                                        {post.fullName || post.username}
+                                                    </div>
+                                                    <div style={styles.postTime}>
+                                                        {timeAgo(post.createdAt)}
+                                                    </div>
                                                     </div>
                                                 </div>
                                                 <span style={{

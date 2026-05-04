@@ -36,7 +36,8 @@ public class AuthService {
                 token,
                 saved.getId(),
                 saved.getUsername(),
-                saved.getRole().name()
+                saved.getRole().name(),
+                saved.getAvatarUrl()  // ← thêm
         );
     }
 
@@ -59,7 +60,8 @@ public class AuthService {
                 token,
                 user.getId(),
                 user.getUsername(),
-                user.getRole().name()
+                user.getRole().name(),
+                user.getAvatarUrl()  // ← thêm dòng này
         );
     }
 }

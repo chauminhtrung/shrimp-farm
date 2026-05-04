@@ -102,7 +102,7 @@ export default function ProfilePage() {
                 ...user,
                 fullName: res.data.fullName,
                 email: res.data.email,
-                avatarUrl: res.data.avatarUrl
+                avatarUrl: res.data.avatarUrl  // ← đảm bảo có dòng này
             }, localStorage.getItem('token'));
 
             toast.success('Cập nhật thành công!');

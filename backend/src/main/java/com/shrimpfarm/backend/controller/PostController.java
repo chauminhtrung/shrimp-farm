@@ -2,6 +2,7 @@ package com.shrimpfarm.backend.controller;
 
 import com.shrimpfarm.backend.Entity.Post;
 import com.shrimpfarm.backend.dto.PostDTO;
+import com.shrimpfarm.backend.dto.PostResponseDTO;
 import com.shrimpfarm.backend.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,21 +18,19 @@ public class PostController {
 
     // GET /api/posts — tất cả bài viết
     @GetMapping
-    public ResponseEntity<List<Post>> getPosts(
+    public ResponseEntity<List<PostResponseDTO>> getPosts(
             @RequestParam(required = false) Post.PostTag tag,
             @RequestParam(required = false) String keyword) {
-
         if (keyword != null && !keyword.isEmpty())
-            return ResponseEntity.ok(postService.searchPosts(keyword));
+            return ResponseEntity.ok(postService.searchPostsDTO(keyword));
         if (tag != null)
-            return ResponseEntity.ok(postService.getPostsByTag(tag));
-        return ResponseEntity.ok(postService.getAllPosts());
+            return ResponseEntity.ok(postService.getPostsByTagDTO(tag));
+        return ResponseEntity.ok(postService.getAllPostsDTO());
     }
 
-    // GET /api/posts/1
     @GetMapping("/{id}")
-    public ResponseEntity<Post> getPost(@PathVariable Long id) {
-        return ResponseEntity.ok(postService.getPostById(id));
+    public ResponseEntity<PostResponseDTO> getPost(@PathVariable Long id) {
+        return ResponseEntity.ok(postService.getPostDTOById(id));
     }
 
     // POST /api/posts — đăng bài mới

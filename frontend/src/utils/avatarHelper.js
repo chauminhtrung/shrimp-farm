@@ -17,5 +17,19 @@ export function getAvatarLetter(user) {
 }
 
 export function getAvatarSrc(user) {
+    if (!user) return null;
+    
+    // Ưu tiên lấy từ localStorage vì context có thể chưa update
+    try {
+        const stored = localStorage.getItem('user');
+        if (stored) {
+            const storedUser = JSON.parse(stored);
+            // Chỉ dùng stored nếu cùng userId
+            if (storedUser.userId === user.userId && storedUser.avatarUrl) {
+                return storedUser.avatarUrl;
+            }
+        }
+    } catch {}
+    
     return user?.avatarUrl || null;
 }
