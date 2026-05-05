@@ -2,6 +2,7 @@ package com.shrimpfarm.backend.controller;
 
 import com.shrimpfarm.backend.Entity.Comment;
 import com.shrimpfarm.backend.dto.CommentDTO;
+import com.shrimpfarm.backend.dto.CommentResponseDTO;
 import com.shrimpfarm.backend.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +16,11 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    // GET /api/comments?postId=1
     @GetMapping
-    public ResponseEntity<List<Comment>> getComments(@RequestParam Long postId) {
-        return ResponseEntity.ok(commentService.getCommentsByPost(postId));
+    public ResponseEntity<List<CommentResponseDTO>> getComments(
+            @RequestParam Long postId) {
+        return ResponseEntity.ok(commentService.getCommentsByPostDTO(postId));
     }
-
     // POST /api/comments
     @PostMapping
     public ResponseEntity<Comment> createComment(@RequestBody CommentDTO dto) {

@@ -168,14 +168,7 @@ export default function PostDetailPage() {
                     {/* Comment form */}
                     <form onSubmit={handleComment} style={styles.commentForm}>
                         <div style={styles.commentInputRow}>
-                            <div style={{
-                                ...styles.avatar,
-                                background: user ? '#1D9E75' : '#ccc',
-                                flexShrink: 0
-                            }}>
-                                
-                                {user?.username?.[0]?.toUpperCase() || '?'}
-                            </div>
+                        <Avatar user={user} size={36} />
                             <input
                                 style={styles.commentInput}
                                 placeholder={
