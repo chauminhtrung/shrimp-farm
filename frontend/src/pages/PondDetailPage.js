@@ -7,7 +7,7 @@ import SensorPanel from '../components/SensorPanel';
 import PondMap from '../components/PondMap';
 import AIPanel from '../components/AIPanel';
 import AlertPanel from '../components/AlertPanel';
-
+import SensorChart from '../components/SensorChart';
 export default function PondDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -140,6 +140,10 @@ export default function PondDetailPage() {
 
                 {/* Row 1: Sensor */}
                 <SensorPanel sensorData={sensorData} />
+
+{/* Chart */}
+<SensorChart pondId={parseInt(id)} />
+
 
                 {/* Row 2: Pond Map + AI + Alert */}
                 <div style={styles.row2}>
