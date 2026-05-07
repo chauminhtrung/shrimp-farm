@@ -16,6 +16,7 @@ export default function PondDetailPage() {
     const [prediction, setPrediction] = useState(null);
     const [alerts, setAlerts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [chartKey, setChartKey] = useState(0);
 
     // Load pond info
     const fetchPond = useCallback(async () => {
@@ -69,15 +70,16 @@ export default function PondDetailPage() {
         setLoading(false);
     }, [fetchPond, fetchSensor, fetchPrediction, fetchAlerts]);
 
-    useEffect(() => {
-        fetchAll();
-        // Auto refresh mỗi 30 giây
-        const interval = setInterval(() => {
-            fetchSensor();
-            fetchAlerts();
-        }, 30000);
-        return () => clearInterval(interval);
-    }, [fetchAll, fetchSensor, fetchAlerts]);
+useEffect(() => {
+    fetchAll();
+    const interval = setInterval(() => {
+        fetchSensor();
+        fetchAlerts();
+        fetchPrediction();
+        setChartKey(prev => prev + 1); // force SensorChart re-fetch
+    }, 15000); // 15 giây thay vì 30
+    return () => clearInterval(interval);
+}, [fetchAll, fetchSensor, fetchAlerts, fetchPrediction]);
 
     // Gọi AI dự đoán thủ công
     const handlePredict = async () => {
@@ -142,7 +144,7 @@ export default function PondDetailPage() {
                 <SensorPanel sensorData={sensorData} />
 
 {/* Chart */}
-<SensorChart pondId={parseInt(id)} />
+<SensorChart pondId={parseInt(id)} key={chartKey} />
 
 
                 {/* Row 2: Pond Map + AI + Alert */}

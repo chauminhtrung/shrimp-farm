@@ -17,3 +17,9 @@ input:focus {
     border-color: #185FA5 !important;
     box-shadow: 0 0 0 3px rgba(24, 95, 165, 0.1);
 }
+
+@keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(29,158,117,0.4); }
+    70%  { box-shadow: 0 0 0 6px rgba(29,158,117,0); }
+    100% { box-shadow: 0 0 0 0 rgba(29,158,117,0); }
+}

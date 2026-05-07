@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid,
-    Tooltip, Legend, ResponsiveContainer
+    Tooltip, ResponsiveContainer
 } from 'recharts';
 import api from '../services/api';
 
 const METRICS = [
-    { key: 'temperature', label: 'Nhiệt độ (°C)',  color: '#E24B4A', unit: '°C' },
-    { key: 'ph',          label: 'pH',              color: '#185FA5', unit: '' },
-    { key: 'oxygen',      label: 'Oxy (mg/L)',      color: '#1D9E75', unit: 'mg/L' },
-    { key: 'turbidity',   label: 'Độ đục (NTU)',    color: '#BA7517', unit: 'NTU' },
+    { key: 'temperature', label: 'Nhiệt độ (°C)', color: '#E24B4A' },
+    { key: 'ph',          label: 'pH',             color: '#185FA5' },
+    { key: 'oxygen',      label: 'Oxy (mg/L)',     color: '#1D9E75' },
+    { key: 'turbidity',   label: 'Độ đục (NTU)',   color: '#BA7517' },
 ];
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -40,38 +40,46 @@ export default function SensorChart({ pondId }) {
     const [data, setData] = useState([]);
     const [activeMetrics, setActiveMetrics] = useState(['temperature', 'ph', 'oxygen']);
     const [loading, setLoading] = useState(true);
-    const [range, setRange] = useState(24); // giờ gần nhất
+    const [range, setRange] = useState(24);
+    const [lastUpdate, setLastUpdate] = useState('');
 
-    useEffect(() => {
-        const fetchHistory = async () => {
-            setLoading(true);
-            try {
-                const res = await api.get(`/api/sensor/history/${pondId}`);
-                const raw = res.data;
-
-                // Lấy số bản ghi theo range
-                const limit = range === 24 ? 48 : range === 12 ? 24 : 12;
-                const sliced = raw.slice(0, limit).reverse();
-
-                const formatted = sliced.map(d => ({
-                    time: new Date(d.recordedAt).toLocaleTimeString('vi-VN', {
-                        hour: '2-digit', minute: '2-digit'
-                    }),
-                    temperature: d.temperature ? parseFloat(d.temperature.toFixed(1)) : null,
-                    ph:          d.ph          ? parseFloat(d.ph.toFixed(2))          : null,
-                    oxygen:      d.oxygen      ? parseFloat(d.oxygen.toFixed(1))      : null,
-                    turbidity:   d.turbidity   ? parseFloat(d.turbidity.toFixed(1))   : null,
-                }));
-
-                setData(formatted);
-            } catch {
-                setData([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchHistory();
+    const fetchHistory = useCallback(async (showLoading = false) => {
+        if (showLoading) setLoading(true);
+        try {
+            const res = await api.get(`/api/sensor/history/${pondId}`);
+            const raw = res.data;
+            const limit = range === 24 ? 48 : range === 12 ? 24 : 12;
+            const sliced = raw.slice(0, limit).reverse();
+            const formatted = sliced.map(d => ({
+                time: new Date(d.recordedAt).toLocaleTimeString('vi-VN', {
+                    hour: '2-digit', minute: '2-digit'
+                }),
+                temperature: d.temperature ? parseFloat(d.temperature.toFixed(1)) : null,
+                ph:          d.ph          ? parseFloat(d.ph.toFixed(2))          : null,
+                oxygen:      d.oxygen      ? parseFloat(d.oxygen.toFixed(1))      : null,
+                turbidity:   d.turbidity   ? parseFloat(d.turbidity.toFixed(1))   : null,
+            }));
+            setData(formatted);
+            setLastUpdate(new Date().toLocaleTimeString('vi-VN'));
+        } catch {
+            setData([]);
+        } finally {
+            if (showLoading) setLoading(false);
+        }
     }, [pondId, range]);
+
+    // Load lần đầu
+    useEffect(() => {
+        fetchHistory(true);
+    }, [fetchHistory]);
+
+    // Auto refresh mỗi 15 giây — không show loading spinner
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetchHistory(false);
+        }, 15000);
+        return () => clearInterval(interval);
+    }, [fetchHistory]);
 
     const toggleMetric = (key) => {
         setActiveMetrics(prev =>
@@ -84,29 +92,31 @@ export default function SensorChart({ pondId }) {
     return (
         <div style={styles.card}>
             <div style={styles.header}>
-                <span style={styles.title}>📈 Biểu đồ dữ liệu sensor</span>
-                <div style={styles.controls}>
-                    {/* Range selector */}
-                    <div style={styles.rangeRow}>
-                        {[
-                            { val: 6,  label: '6h' },
-                            { val: 12, label: '12h' },
-                            { val: 24, label: '24h' },
-                        ].map(r => (
-                            <button
-                                key={r.val}
-                                style={{
-                                    ...styles.rangeBtn,
-                                    background: range === r.val ? '#185FA5' : '#fff',
-                                    color: range === r.val ? '#fff' : '#555',
-                                    borderColor: range === r.val ? '#185FA5' : '#ddd'
-                                }}
-                                onClick={() => setRange(r.val)}
-                            >
-                                {r.label}
-                            </button>
-                        ))}
-                    </div>
+                <div style={styles.titleRow}>
+                    <span style={styles.title}>📈 Biểu đồ dữ liệu sensor</span>
+                    {/* Live indicator */}
+                    <span style={styles.liveDot} />
+                    <span style={styles.liveText}>Tự động cập nhật 15s</span>
+                </div>
+                <div style={styles.rangeRow}>
+                    {[
+                        { val: 6,  label: '6h' },
+                        { val: 12, label: '12h' },
+                        { val: 24, label: '24h' },
+                    ].map(r => (
+                        <button
+                            key={r.val}
+                            style={{
+                                ...styles.rangeBtn,
+                                background: range === r.val ? '#185FA5' : '#fff',
+                                color: range === r.val ? '#fff' : '#555',
+                                borderColor: range === r.val ? '#185FA5' : '#ddd'
+                            }}
+                            onClick={() => setRange(r.val)}
+                        >
+                            {r.label}
+                        </button>
+                    ))}
                 </div>
             </div>
 
@@ -142,7 +152,7 @@ export default function SensorChart({ pondId }) {
                 <div style={styles.loading}>Đang tải dữ liệu...</div>
             ) : data.length === 0 ? (
                 <div style={styles.empty}>
-                    Chưa có dữ liệu sensor. Hãy chạy IoT Simulator để có dữ liệu.
+                    Chưa có dữ liệu. Hãy chạy IoT Simulator để có dữ liệu.
                 </div>
             ) : (
                 <ResponsiveContainer width="100%" height={260}>
@@ -187,7 +197,7 @@ export default function SensorChart({ pondId }) {
             )}
 
             <div style={styles.footer}>
-                Dữ liệu {range}h gần nhất · {data.length} điểm đo
+                {data.length} điểm đo · Cập nhật lúc: {lastUpdate}
             </div>
         </div>
     );
@@ -201,10 +211,18 @@ const styles = {
     },
     header: {
         display: 'flex', justifyContent: 'space-between',
-        alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px'
+        alignItems: 'center', marginBottom: '12px',
+        flexWrap: 'wrap', gap: '8px'
     },
+    titleRow: { display: 'flex', alignItems: 'center', gap: '6px' },
     title: { fontSize: '13px', fontWeight: '600', color: '#1a1a1a' },
-    controls: { display: 'flex', gap: '8px', alignItems: 'center' },
+    liveDot: {
+        width: '7px', height: '7px', borderRadius: '50%',
+        background: '#1D9E75',
+        boxShadow: '0 0 0 2px rgba(29,158,117,0.3)',
+        animation: 'pulse 2s infinite'
+    },
+    liveText: { fontSize: '11px', color: '#1D9E75', fontWeight: '500' },
     rangeRow: { display: 'flex', gap: '4px' },
     rangeBtn: {
         padding: '4px 10px', border: '1px solid',
@@ -212,7 +230,8 @@ const styles = {
         cursor: 'pointer', fontWeight: '500'
     },
     metricRow: {
-        display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px'
+        display: 'flex', gap: '6px',
+        flexWrap: 'wrap', marginBottom: '14px'
     },
     metricBtn: {
         padding: '4px 10px', border: '1px solid',
@@ -228,8 +247,8 @@ const styles = {
     empty: {
         height: '200px', display: 'flex',
         alignItems: 'center', justifyContent: 'center',
-        color: '#aaa', fontSize: '13px', textAlign: 'center',
-        padding: '20px'
+        color: '#aaa', fontSize: '13px',
+        textAlign: 'center', padding: '20px'
     },
     footer: {
         fontSize: '11px', color: '#bbb',
