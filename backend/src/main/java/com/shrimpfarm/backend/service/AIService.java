@@ -40,36 +40,40 @@ public class AIService {
         Pond pond = pondRepository.findById(dto.getPondId())
                 .orElseThrow(() -> new RuntimeException("Pond not found"));
 
-        // Chuẩn bị data gửi sang Python
-        Map<String, Object> request = new HashMap<>();
-        request.put("pond_id", dto.getPondId());
-        request.put("ph", dto.getPh());
-        request.put("temperature", dto.getTemperature());
-        request.put("oxygen", dto.getOxygen());
-
         Prediction.RiskLevel riskLevel;
         int riskPercent;
         String recommendation;
 
         try {
-            // Gọi Python FastAPI
+            // Gửi sang Python — field name phải khớp snake_case
+            Map<String, Object> request = new HashMap<>();
+            request.put("pond_id",     dto.getPondId());
+            request.put("ph",          dto.getPh());
+            request.put("temperature", dto.getTemperature());
+            request.put("oxygen",      dto.getOxygen());
+            request.put("turbidity",   2.0); // default
+
             Map response = restTemplate.postForObject(
                     pythonUrl, request, Map.class
             );
 
             String level = (String) response.get("risk_level");
-            riskPercent = (Integer) response.get("risk_percent");
-            riskLevel = Prediction.RiskLevel.valueOf(level);
-            recommendation = buildRecommendation(riskLevel, dto);
+            riskPercent  = (Integer) response.get("risk_percent");
+            recommendation = (String) response.get("recommendation");
+            riskLevel    = Prediction.RiskLevel.valueOf(level);
+
+            System.out.println("AI Prediction: " + level
+                    + " (" + riskPercent + "%)");
 
         } catch (Exception e) {
-            // Python chưa chạy → dùng rule-based đơn giản
-            riskLevel = calculateRiskManually(dto);
-            riskPercent = calculateRiskPercent(dto);
+            System.out.println("Python AI unavailable, using rule-based: "
+                    + e.getMessage());
+            // Fallback rule-based
+            riskLevel      = calculateRiskManually(dto);
+            riskPercent    = calculateRiskPercent(dto);
             recommendation = buildRecommendation(riskLevel, dto);
         }
 
-        // Lưu kết quả vào database
         Prediction prediction = Prediction.builder()
                 .pond(pond)
                 .riskLevel(riskLevel)

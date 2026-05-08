@@ -1,0 +1,12 @@
+{
+  "accuracy": 1.0,
+  "n_samples": 1000,
+  "n_train": 800,
+  "n_test": 200,
+  "feature_importance": {
+    "temperature": 0.3115,
+    "ph": 0.005,
+    "oxygen": 0.3803,
+    "turbidity": 0.3032
+  }
+}
