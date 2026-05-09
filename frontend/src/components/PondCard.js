@@ -6,17 +6,22 @@ export default function PondCard({ pond, onDelete }) {
     const navigate = useNavigate();
     const [sensor, setSensor] = useState(null);
 
-    useEffect(() => {
-        const fetchSensor = async () => {
-            try {
-                const res = await api.get(`/api/sensor/latest/${pond.id}`);
-                setSensor(res.data);
-            } catch {
-                setSensor(null);
-            }
-        };
-        fetchSensor();
-    }, [pond.id]);
+useEffect(() => {
+    const fetchSensor = async () => {
+        try {
+            const res = await api.get(`/api/sensor/latest/${pond.id}`);
+            setSensor(res.data);
+        } catch {
+            setSensor(null);
+        }
+    };
+
+    fetchSensor(); // gọi ngay lần đầu
+
+    // Auto refresh mỗi 15 giây
+    const interval = setInterval(fetchSensor, 15000);
+    return () => clearInterval(interval);
+}, [pond.id]);
 
     const getStatusInfo = () => {
         if (!sensor) return { text: 'Chưa có dữ liệu', bg: '#f5f5f5', color: '#888' };

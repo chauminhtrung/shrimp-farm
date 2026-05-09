@@ -39,9 +39,16 @@ export default function PondListPage() {
     }
 };
 
-    useEffect(() => {
+useEffect(() => {
+    fetchPonds();
+    
+    // Auto refresh mỗi 15 giây
+    const interval = setInterval(() => {
         fetchPonds();
-    }, []);
+    }, 15000);
+    
+    return () => clearInterval(interval);
+}, []);
 
     // Tạo ao mới
     const handleCreate = async (formData) => {
