@@ -1,4 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+/* index.css - COPY TOÀN BỘ VÀ THAY THẾ FILE CŨ */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+    /* Bảng màu hệ điều hành */
+    --bg-deep: #020617;        /* Nền tối sâu nhất */
+    --bg-gradient: radial-gradient(circle at 50% 0%, #1e293b 0%, #020617 100%);
+    --card-bg: rgba(30, 41, 59, 0.5); /* Màu thẻ kính mờ nhạt hơn nền */
+    --accent-cyan: #22d3ee;    /* Màu xanh Neon cho thông số */
+    --accent-purple: #a855f7;  /* Màu tím cho AI */
+    --text-main: #f8fafc;      /* Chữ trắng chính */
+    --text-dim: #94a3b8;       /* Chữ xám phụ */
+    --border-glass: rgba(255, 255, 255, 0.08);
+}
 
 * {
     box-sizing: border-box;
@@ -7,19 +20,230 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont,
-        'Segoe UI', sans-serif;
-    background: #f0f4f8;
-    color: #333;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg-deep);
+    background-image: var(--bg-gradient);
+    color: var(--text-main);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
 }
 
-input:focus {
-    border-color: #185FA5 !important;
-    box-shadow: 0 0 0 3px rgba(24, 95, 165, 0.1);
+/* Container bọc toàn bộ ứng dụng */
+.app-container {
+    min-height: 100vh;
+}
+
+/* Lớp kính mờ Glassmorphism dùng chung cho các khối */
+.glass-panel {
+    background: var(--card-bg) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-glass) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    color: var(--text-main) !important;
+}
+
+/* Hiệu ứng chữ Gradient cho tên Ao */
+.text-gradient {
+    background: linear-gradient(to right, var(--accent-cyan), #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+}
+
+/* Style cho các nút bấm hiện đại */
+.modern-back-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-glass);
+    color: var(--text-dim);
+    padding: 8px 20px;
+    border-radius: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modern-back-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: var(--accent-cyan);
+}
+
+.modern-predict-btn {
+    background: linear-gradient(135deg, #6366f1 0%, var(--accent-purple) 100%);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+    transition: all 0.3s ease;
+}
+
+.modern-predict-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(168, 85, 247, 0.5);
+}
+
+/* Pulse animation cho các trạng thái hoạt động */
+.dot-pulse {
+    height: 8px;
+    width: 8px;
+    background-color: var(--accent-cyan);
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    box-shadow: 0 0 8px var(--accent-cyan);
+    animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-    0%   { box-shadow: 0 0 0 0 rgba(29,158,117,0.4); }
-    70%  { box-shadow: 0 0 0 6px rgba(29,158,117,0); }
-    100% { box-shadow: 0 0 0 0 rgba(29,158,117,0); }
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(34, 211, 238, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
 }
+
+/* Tùy chỉnh thanh cuộn cho ngầu hơn */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-deep);
+}
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* --- OVERRIDE NỘI THẤT COMPONENT CON --- */
+
+/* 1. Sửa màu cho SensorPanel (Các ô chỉ số) */
+.glass-panel .sensor-card, 
+.glass-panel [style*="background: rgb(255, 255, 255)"],
+.glass-panel [style*="background: white"] {
+    background: rgba(255, 255, 255, 0.03) !important; /* Biến nền trắng thành trong suốt nhẹ */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: var(--text-main) !important;
+}
+
+/* Làm nổi bật các con số chỉ số (như 25.5, 7.0...) */
+.glass-panel span[style*="font-size: 24px"],
+.glass-panel div[style*="font-size: 24px"] {
+    color: var(--accent-cyan) !important;
+    text-shadow: 0 0 10px rgba(34, 211, 238, 0.3);
+}
+
+/* 2. Sửa màu cho AlertPanel (Các thông báo) */
+.glass-panel .alert-item,
+.glass-panel [style*="border-bottom: 1px solid"] {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    background: transparent !important;
+}
+
+.glass-panel .alert-message {
+    color: var(--text-main) !important;
+}
+
+/* 3. Sửa màu cho AIPanel */
+.glass-panel [style*="color: rgb(26, 26, 26)"],
+.glass-panel [style*="color: #1a1a1a"] {
+    color: var(--text-main) !important; /* Chuyển chữ đen sang chữ trắng */
+}
+
+/* Giữ nguyên màu đỏ cho các cảnh báo nguy hiểm nhưng làm nó rực rỡ hơn */
+[style*="color: #d32f2f"], [style*="color: red"] {
+    color: #ff4d4d !important;
+    font-weight: bold;
+}
+
+/* --- CẢI THIỆN ĐỘ ĐỌC CHO TIÊU ĐỀ VÀ THÔNG SỐ --- */
+
+/* 1. Tiêu đề các khối (Card Titles) */
+.glass-panel h3, 
+.glass-panel .title,
+.glass-panel span[style*="font-weight: 600"] {
+    color: #ffffff !important; /* Trắng tinh khiết */
+    font-size: 1.1rem !important;
+    letter-spacing: 0.5px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    text-transform: uppercase; /* Viết hoa để chuyên nghiệp hơn */
+}
+
+/* 2. Thông số chính (Sensor Values) */
+/* Nhắm mục tiêu trực tiếp vào các con số trong SensorPanel */
+.glass-panel span[style*="font-size: 24px"],
+.glass-panel .sensor-value {
+    color: var(--accent-cyan) !important;
+    font-size: 2rem !important; /* Tăng kích thước lên hẳn để dễ đọc */
+    font-weight: 800 !important;
+    text-shadow: 0 0 15px rgba(34, 211, 238, 0.4); /* Hiệu ứng phát sáng mạnh hơn */
+}
+
+/* 3. Đơn vị đo (Unit: °C, mg/L, pH...) */
+.glass-panel span[style*="font-size: 24px"] + span,
+.glass-panel .sensor-unit {
+    color: var(--text-dim) !important;
+    font-size: 1rem !important;
+    margin-left: 4px;
+}
+
+/* 4. Nhãn phụ (Labels: Nhiệt độ, Oxy...) */
+.glass-panel label,
+.glass-panel p[style*="color: #888"] {
+    color: #cbd5e1 !important; /* Xám sáng hơn (Slate 300) */
+    font-weight: 500 !important;
+    font-size: 0.95rem !important;
+}
+
+/* 5. Cảnh báo (Alerts) */
+.glass-panel .alert-message,
+.glass-panel [style*="color: #1a1a1a"] {
+    color: #f1f5f9 !important; /* Chữ trong alert phải trắng sáng */
+    font-size: 0.95rem !important;
+}
+
+/* Hiệu ứng bóng đổ và độ nét cho các con số Dashboard */
+.glass-panel div[style*="font-weight: 900"] {
+    background: linear-gradient(180deg, #fff 30%, #22d3ee 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.3));
+}
+
+@keyframes pulse-cyan {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(34, 211, 238, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(34, 211, 238, 0);
+  }
+}
+
+.animate-pulse-custom {
+  animation: pulse-cyan 2s infinite;
+}
+
+/* Hiệu ứng nhấp nháy chung */
+@keyframes custom-pulse {
+  0% { opacity: 0.6; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0.6; transform: scale(0.9); }
+}
+
+.pulse-active {
+  animation: custom-pulse 2s infinite ease-in-out;
+}
+

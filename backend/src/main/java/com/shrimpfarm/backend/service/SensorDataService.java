@@ -9,6 +9,8 @@ import com.shrimpfarm.backend.repository.PondRepository;
 import com.shrimpfarm.backend.repository.SensorDataRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -21,7 +23,8 @@ public class SensorDataService {
 
     // Lấy lịch sử dữ liệu của ao — dùng cho biểu đồ Recharts
     public List<SensorData> getHistory(Long pondId) {
-        return sensorDataRepository.findByPondIdOrderByRecordedAtDesc(pondId);
+        List<SensorData> data = sensorDataRepository.findTop50ByPondIdOrderByRecordedAtDesc(pondId);
+        return data;
     }
 
     // Lấy dữ liệu mới nhất của ao — dùng cho dashboard realtime
@@ -43,6 +46,7 @@ public class SensorDataService {
                 .ph(dto.getPh())
                 .oxygen(dto.getOxygen())
                 .turbidity(dto.getTurbidity())
+                .recordedAt(dto.getRecordedAt() != null ? dto.getRecordedAt() : LocalDateTime.now())
                 .build();
 
         SensorData saved = sensorDataRepository.save(data);

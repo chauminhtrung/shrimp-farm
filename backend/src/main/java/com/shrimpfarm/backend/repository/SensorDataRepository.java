@@ -14,4 +14,7 @@ public interface SensorDataRepository extends JpaRepository<SensorData, Long> {
 
     // Lấy dữ liệu mới nhất của 1 ao — dùng cho dashboard
     Optional<SensorData> findTopByPondIdOrderByRecordedAtDesc(Long pondId);
+
+
+    List<SensorData> findTop50ByPondIdOrderByRecordedAtDesc(Long pondId);
 }

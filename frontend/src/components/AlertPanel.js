@@ -1,125 +1,154 @@
 export default function AlertPanel({ alerts, onMarkRead }) {
+console.log("Danh sách hiện tại:", alerts.map(a => `${a.id}: ${a.isRead}`));
+    // Tách mảng dữ liệu
     const unread = alerts.filter(a => !a.isRead);
     const read = alerts.filter(a => a.isRead);
 
     return (
-        <div style={styles.card}>
+        <div className="glass-panel" style={styles.card}>
+            {/* HEADER */}
             <div style={styles.header}>
-                <span style={styles.title}>🔔 Cảnh báo</span>
+                <span style={styles.title}>🔔 HỆ THỐNG CẢNH BÁO</span>
                 {unread.length > 0 && (
-                    <span style={styles.badge}>{unread.length} chưa đọc</span>
+                    <span style={styles.countBadge}>{unread.length} MỚI</span>
                 )}
             </div>
 
-            {alerts.length === 0 ? (
-                <div style={styles.empty}>Không có cảnh báo nào</div>
-            ) : (
-                <div style={styles.list}>
-                    {/* Chưa đọc hiển thị trước */}
-                    {unread.map(alert => (
+            <div style={styles.list}>
+                {/* --- PHẦN 1: CẢNH BÁO CHƯA XỬ LÝ (Hiện lên đầu) --- */}
+                {unread.map(alert => {
+                    const isDanger = alert.level === 'DANGER';
+                    const color = isDanger ? '#ff4d4d' : '#fbbf24';
+                    
+                    return (
                         <div key={alert.id} style={{
                             ...styles.item,
-                            background: '#fff',
-                            borderLeft: `3px solid ${
-                                alert.level === 'DANGER' ? '#E24B4A' : '#BA7517'
-                            }`
+                            background: 'rgba(255,255,255,0.05)',
+                            borderColor: `${color}44`,
+                            borderLeft: `4px solid ${color}`
                         }}>
-                            <div style={{
-                                ...styles.dot,
-                                background: alert.level === 'DANGER'
-                                    ? '#E24B4A' : '#BA7517'
-                            }} />
                             <div style={styles.itemContent}>
-                                <div style={styles.msg}>{alert.message}</div>
-                                <div style={styles.time}>
-                                    {new Date(alert.createdAt)
-                                        .toLocaleString('vi-VN')}
+                                <div style={{ ...styles.msg, color: '#f8fafc' }}>
+                                    {alert.message.split(/(\d+\.?\d*)/).map((part, i) => 
+                                        /\d/.test(part) ? <b key={i} style={{ color: color, fontSize: '15px' }}>{part}</b> : part
+                                    )}
                                 </div>
+                                <div style={styles.time}>{new Date(alert.createdAt).toLocaleString('vi-VN')}</div>
                             </div>
-                            <button
-                                style={styles.readBtn}
+                            <button 
+                                style={{ ...styles.readBtn, color: color, borderColor: `${color}66` }} 
                                 onClick={() => onMarkRead(alert.id)}
-                                title="Đánh dấu đã đọc"
                             >
-                                ✓
+                                ĐÃ XỬ LÝ
                             </button>
                         </div>
-                    ))}
+                    );
+                })}
 
-                    {/* Đã đọc hiển thị sau — mờ hơn */}
-                    {read.slice(0, 3).map(alert => (
-                        <div key={alert.id} style={{
-                            ...styles.item,
-                            background: '#fafafa',
-                            opacity: 0.6
-                        }}>
-                            <div style={{
-                                ...styles.dot,
-                                background: '#ccc'
-                            }} />
-                            <div style={styles.itemContent}>
-                                <div style={{
-                                    ...styles.msg,
-                                    color: '#999',
-                                    textDecoration: 'line-through'
-                                }}>
-                                    {alert.message}
-                                </div>
-                                <div style={styles.time}>
-                                    {new Date(alert.createdAt)
-                                        .toLocaleString('vi-VN')}
-                                </div>
+                {/* --- KHOẢNG CÁCH GIỮA 2 PHẦN --- */}
+                {read.length > 0 && unread.length > 0 && (
+                    <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '10px 0' }} />
+                )}
+
+                {/* --- PHẦN 2: LỊCH SỬ ĐÃ XỬ LÝ (Mờ đi và ẩn nút) --- */}
+                {read.slice(0, 3).map(alert => ( // Chỉ hiện 3 cái gần nhất cho gọn
+                    <div key={alert.id} style={{
+                        ...styles.item,
+                        background: 'rgba(255,255,255,0.01)',
+                        borderColor: 'transparent',
+                        opacity: 0.4,
+                    }}>
+                        <div style={styles.itemContent}>
+                            <div style={{ ...styles.msg, color: '#94a3b8', textDecoration: 'line-through' }}>
+                                {alert.message}
                             </div>
-                            <span style={styles.readTag}>Đã đọc</span>
+                            <div style={styles.time}>Hoàn tất: {new Date(alert.createdAt).toLocaleTimeString('vi-VN')}</div>
                         </div>
-                    ))}
-                </div>
-            )}
+                        <span style={{ fontSize: '10px', color: '#64748b', fontWeight: '800' }}>✓ XONG</span>
+                    </div>
+                ))}
+
+                {/* TRƯỜNG HỢP TRỐNG */}
+                {alerts.length === 0 && (
+                    <div style={{ textAlign: 'center', color: '#64748b', fontSize: '13px', padding: '20px' }}>
+                        Không có cảnh báo nào.
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
 
 const styles = {
     card: {
-        background: '#fff', borderRadius: '12px',
-        padding: '16px', border: '1px solid #e8e8e8'
+        background: 'rgba(15, 23, 42, 0.6)',
+        borderRadius: '16px',
+        padding: '20px',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        backdropFilter: 'blur(10px)',
+        color: '#f8fafc'
     },
-    header: {
-        display: 'flex', justifyContent: 'space-between',
-        alignItems: 'center', marginBottom: '12px'
+    header: { 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: '15px' 
     },
-    title: { fontSize: '13px', fontWeight: '600', color: '#1a1a1a' },
-    badge: {
-        fontSize: '11px', padding: '2px 8px',
-        borderRadius: '20px', background: '#FCEBEB',
-        color: '#E24B4A', fontWeight: '500'
+    title: { 
+        fontSize: '15px', 
+        fontWeight: '800', 
+        color: '#f8fafc', 
+        letterSpacing: '1.5px',
+        textTransform: 'uppercase'
     },
-    empty: {
-        fontSize: '12px', color: '#aaa',
-        textAlign: 'center', padding: '12px 0'
+    countBadge: { 
+        fontSize: '11px', 
+        color: '#ff4d4d', 
+        background: 'rgba(255, 77, 77, 0.15)', 
+        padding: '3px 10px', 
+        borderRadius: '20px', 
+        border: '1px solid rgba(255, 77, 77, 0.3)',
+        fontWeight: '800'
     },
-    list: { display: 'flex', flexDirection: 'column', gap: '6px' },
-    item: {
-        display: 'flex', alignItems: 'flex-start', gap: '8px',
-        padding: '8px 10px', borderRadius: '6px',
-        border: '1px solid #f0f0f0'
+    list: { 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '12px',
+        maxHeight: '400px', // Thêm cuộn nếu quá nhiều cảnh báo
+        overflowY: 'auto',
+        paddingRight: '5px'
     },
-    dot: {
-        width: '7px', height: '7px', borderRadius: '50%',
-        marginTop: '4px', flexShrink: 0
+    item: { 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '15px', 
+        padding: '14px', 
+        borderRadius: '12px', 
+        border: '1px solid', 
+        transition: 'all 0.3s ease',
+        position: 'relative'
     },
     itemContent: { flex: 1 },
-    msg: { fontSize: '12px', color: '#333', lineHeight: 1.5 },
-    time: { fontSize: '11px', color: '#bbb', marginTop: '2px' },
-    readBtn: {
-        background: '#E1F5EE', border: 'none',
-        color: '#1D9E75', cursor: 'pointer',
-        fontSize: '12px', fontWeight: '600',
-        padding: '2px 7px', borderRadius: '4px'
+    msg: { 
+        fontSize: '14px', 
+        fontWeight: '600', 
+        marginBottom: '6px',
+        lineHeight: 1.4
     },
-    readTag: {
-        fontSize: '10px', color: '#bbb',
-        padding: '2px 6px', background: '#f5f5f5',
-        borderRadius: '4px', whiteSpace: 'nowrap'
+    time: { 
+        fontSize: '11px', 
+        color: '#64748b',
+        fontWeight: '500'
+    },
+    readBtn: { 
+        background: 'rgba(255,255,255,0.07)', 
+        border: '1px solid rgba(255,255,255,0.1)', 
+        padding: '8px 15px', 
+        borderRadius: '8px', 
+        fontSize: '10px', 
+        fontWeight: '900', 
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+        whiteSpace: 'nowrap'
     }
 };

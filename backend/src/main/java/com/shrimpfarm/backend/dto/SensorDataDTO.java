@@ -2,6 +2,8 @@ package com.shrimpfarm.backend.dto;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,4 +14,5 @@ public class SensorDataDTO {
     private Double ph;
     private Double oxygen;
     private Double turbidity;
+    private LocalDateTime recordedAt; // THÊM DÒNG NÀY
 }

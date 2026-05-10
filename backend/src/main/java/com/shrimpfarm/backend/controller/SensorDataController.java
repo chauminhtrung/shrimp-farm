@@ -18,7 +18,9 @@ public class SensorDataController {
     // GET /api/sensor/history/1 — lịch sử dữ liệu cho biểu đồ
     @GetMapping("/history/{pondId}")
     public ResponseEntity<List<SensorData>> getHistory(@PathVariable Long pondId) {
-        return ResponseEntity.ok(sensorDataService.getHistory(pondId));
+        return ResponseEntity.ok()
+                .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                .body(sensorDataService.getHistory(pondId));
     }
 
     // GET /api/sensor/latest/1 — dữ liệu mới nhất cho dashboard
