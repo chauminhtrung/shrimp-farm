@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import PondCard from '../components/PondCard';
 import CreatePondModal from '../components/CreatePondModal';
+import DashboardHeader from "../components/DashboardHeader"
 
 export default function PondListPage() {
     const { user } = useAuth();
@@ -12,43 +13,90 @@ export default function PondListPage() {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [totalAlerts, setTotalAlerts] = useState(0);
-    // Load danh sách ao
-  const fetchPonds = async () => {
-    try {
-        const res = await api.get(`/api/ponds?userId=${user.userId}`);
-        setPonds(res.data);
-        fetchTotalAlerts(res.data); // thêm dòng này
-    } catch (err) {
-        toast.error('Không thể tải danh sách ao');
-    } finally {
-        setLoading(false);
-    }
-};
-    const fetchTotalAlerts = async (pondList) => {
-    try {
-        let total = 0;
-        await Promise.all(
-            pondList.map(async (pond) => {
-                const res = await api.get(`/api/alerts/unread?pondId=${pond.id}`);
-                total += res.data.length;
-            })
-        );
-        setTotalAlerts(total);
-    } catch {
-        setTotalAlerts(0);
-    }
-};
 
-useEffect(() => {
-    fetchPonds();
-    
-    // Auto refresh mỗi 15 giây
-    const interval = setInterval(() => {
+
+    const skeletonStyle = `
+  @keyframes shimmer {
+    0% { background-position: -468px 0; }
+    100% { background-position: 468px 0; }
+  }
+`;
+
+    const emojiAnimation = `
+  /* Keyframe này chỉ thay đổi độ nhòe và màu của bóng đổ, không làm icon cử động */
+  @keyframes pureGlow {
+    0% { filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.4)); }
+    50% { filter: drop-shadow(0 0 25px rgba(56, 189, 248, 0.7)); }
+    100% { filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.4)); }
+  }
+  
+  @keyframes rotateHalo {
+    /* Quan trọng: dùng translate(-50%, -50%) để vòng tròn luôn nằm giữa icon */
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+`;
+
+
+    const PondSkeleton = () => (
+        <div style={{
+            background: 'rgba(255, 255, 255, 0.03)',
+            borderRadius: '20px',
+            height: '350px',
+            border: '1px solid rgba(255, 255, 255, 0.05)',
+            position: 'relative',
+            overflow: 'hidden'
+        }}>
+            {/* Hiệu ứng mờ chạy qua (Shimmer) */}
+            <div style={{
+                position: 'absolute',
+                top: 0, left: 0, width: '100%', height: '100%',
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent)',
+                animation: 'shimmer 1.5s infinite'
+            }} />
+            <style>
+                {`@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }`}
+            </style>
+        </div>
+    );
+
+    // Load danh sách ao
+    const fetchPonds = async () => {
+        try {
+            const res = await api.get(`/api/ponds?userId=${user.userId}`);
+            setPonds(res.data);
+            fetchTotalAlerts(res.data); // thêm dòng này
+        } catch (err) {
+            toast.error('Không thể tải danh sách ao');
+        } finally {
+            setLoading(false);
+        }
+    };
+    const fetchTotalAlerts = async (pondList) => {
+        try {
+            let total = 0;
+            await Promise.all(
+                pondList.map(async (pond) => {
+                    const res = await api.get(`/api/alerts/unread?pondId=${pond.id}`);
+                    total += res.data.length;
+                })
+            );
+            setTotalAlerts(total);
+        } catch {
+            setTotalAlerts(0);
+        }
+    };
+
+    useEffect(() => {
         fetchPonds();
-    }, 15000);
-    
-    return () => clearInterval(interval);
-}, []);
+
+        // Auto refresh mỗi 15 giây
+        const interval = setInterval(() => {
+            fetchPonds();
+        }, 15000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     // Tạo ao mới
     const handleCreate = async (formData) => {
@@ -77,66 +125,99 @@ useEffect(() => {
         }
     };
 
+
+
     return (
         <div style={styles.page}>
             <Navbar />
 
             <div style={styles.container}>
                 {/* Header */}
-                <div style={styles.header}>
-                    <div>
-                        <h1 style={styles.title}>Ao nuôi của tôi</h1>
-                        <p style={styles.subtitle}>
-                            Quản lý và theo dõi {ponds.length} ao nuôi tôm
-                        </p>
-                    </div>
-                    <button
-                        style={styles.createBtn}
-                        onClick={() => setShowModal(true)}
-                    >
-                        + Tạo ao mới
-                    </button>
-                </div>
+                <DashboardHeader
+                    userName="Trung"
+                    totalPonds={ponds.length}
+                    alertPonds={ponds.filter(p => p.status === 'Cảnh báo').length}
+                />
 
                 {/* Stats */}
                 <div style={styles.statsRow}>
                     {[
-                        { label: 'Tổng số ao', value: ponds.length, color: '#185FA5' },
-                        { label: 'Đang hoạt động', value: ponds.length, color: '#1D9E75' },
-                        { label: 'Cảnh báo', value: totalAlerts, color: totalAlerts > 0 ? '#BA7517' : '#1D9E75' },
+                        { label: 'Tổng số ao', value: ponds.length, color: '#38bdf8', icon: '🌊' },
+                        { label: 'Đang hoạt động', value: ponds.length, color: '#22c55e', icon: '⚡' },
+                        { label: 'Cảnh báo', value: totalAlerts, color: totalAlerts > 0 ? '#ef4444' : '#22c55e', icon: '⚠️' },
                     ].map((s, i) => (
                         <div key={i} style={styles.statCard}>
-                            <div style={{...styles.statVal, color: s.color}}>{s.value}</div>
-                            <div style={styles.statLabel}>{s.label}</div>
+                            <div>
+                                <div style={styles.statLabel}>{s.label}</div>
+                                <div style={{ ...styles.statVal, color: s.color }}>{s.value}</div>
+                            </div>
+                            <div style={styles.statIcon}>{s.icon}</div>
                         </div>
                     ))}
                 </div>
 
                 {/* Pond list */}
-                {loading ? (
-                    <div style={styles.loading}>Đang tải...</div>
-                ) : ponds.length === 0 ? (
-                    <div style={styles.empty}>
-                        <div style={styles.emptyIcon}>🦐</div>
-                        <div style={styles.emptyText}>Chưa có ao nuôi nào</div>
-                        <button
-                            style={styles.createBtn}
-                            onClick={() => setShowModal(true)}
-                        >
-                            + Tạo ao đầu tiên
-                        </button>
-                    </div>
-                ) : (
-                    <div style={styles.grid}>
-                        {ponds.map(pond => (
-                            <PondCard
-                                key={pond.id}
-                                pond={pond}
-                                onDelete={handleDelete}
-                            />
-                        ))}
-                    </div>
-                )}
+                <div style={styles.contentSection}>
+                    {loading ? (
+                        // 1. Trạng thái đang tải: Hiện khung xương (Skeleton)
+                        <div style={styles.grid}>
+                            {[...Array(6)].map((_, i) => <PondSkeleton key={i} />)}
+                        </div>
+                    ) : ponds.length === 0 ? (
+                        // 2. Trạng thái trống: Hiện Empty State đẹp mắt
+                        <div style={styles.emptyContainer}>
+                            <div style={styles.emptyIllustration}>
+                                <style>{emojiAnimation}</style>
+
+                                {/* Vòng hào quang nét đứt xoay xung quanh */}
+                                <div style={{
+                                    ...styles.emptyCircle,
+                                    animation: 'rotateHalo 12s linear infinite', // Xoay chậm rãi
+                                    border: '2px dashed rgba(56, 189, 248, 0.2)',
+                                    background: 'transparent', // Để nó chỉ là cái vòng xoay
+                                }}></div>
+
+                                {/* Lớp nền phát sáng mờ ảo nằm dưới icon */}
+                                <div style={{
+                                    ...styles.emptyCircle,
+                                    width: '100px', height: '100px',
+                                    background: 'radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%)',
+                                    filter: 'blur(15px)',
+                                    zIndex: 1
+                                }}></div>
+
+                                {/* Icon đứng yên 100%, chỉ có ánh sáng xung quanh thay đổi */}
+                                <span style={{
+                                    ...styles.emptyEmoji,
+                                    animation: 'pureGlow 4s ease-in-out infinite', // Chỉ phát sáng, không scale
+                                    display: 'inline-block',
+                                    position: 'relative',
+                                    zIndex: 2
+                                }}>
+                                    🏝️
+                                </span>
+                            </div>
+                            <h3 style={styles.emptyTitle}>Chưa có ao nuôi nào</h3>
+                            <p style={styles.emptySubText}>
+                                Có vẻ như bạn chưa bắt đầu. Hãy tạo ao nuôi đầu tiên <br />
+                                để hệ thống có thể giúp bạn giám sát 24/7.
+                            </p>
+                            <button
+                                style={styles.createBtnLarge}
+                                onClick={() => setShowModal(true)}
+                            >
+                                🚀 Bắt đầu ngay
+                            </button>
+                        </div>
+                    ) : (
+                        // 3. Trạng thái có dữ liệu: Hiện danh sách ao
+                        <div style={styles.grid}>
+                            {ponds.map(pond => (
+                                <PondCard key={pond.id} pond={pond} onDelete={handleDelete} />
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {showModal && (
@@ -150,29 +231,86 @@ useEffect(() => {
 }
 
 const styles = {
-    page: { minHeight: '100vh', background: '#f0f4f8' },
-    container: { maxWidth: '1100px', margin: '0 auto', padding: '24px 20px' },
-    header: {
-        display: 'flex', justifyContent: 'space-between',
-        alignItems: 'flex-start', marginBottom: '20px'
+    page: {
+        minHeight: '100vh',
+        padding: '40px 20px',
+        // Hiệu ứng Gradient tạo chiều sâu
+        background: `radial-gradient(circle at 0% 0%, rgba(30, 58, 138, 0.5) 0%, transparent 40%),
+                     radial-gradient(circle at 100% 100%, rgba(56, 189, 248, 0.3) 0%, transparent 40%),
+                     #0f172a`,
+        color: '#fff',
+        position: 'relative',
+        overflow: 'hidden',
     },
-    title: { fontSize: '22px', fontWeight: '600', color: '#1a1a1a' },
-    subtitle: { fontSize: '13px', color: '#888', marginTop: '4px' },
+    header: {
+        display: 'flex',            // Kích hoạt flexbox
+        justifyContent: 'space-between', // Đẩy tiêu đề sang trái, nút sang phải
+        alignItems: 'flex-end',    // Căn cho nút nằm ngang hàng với dòng subtitle dưới cùng
+        marginBottom: '30px',       // Khoảng cách với phần Stats bên dưới
+        width: '100%'               // Đảm bảo header chiếm hết chiều ngang container
+    },
+    container: {
+        maxWidth: '1200px', margin: '0 auto', padding: '30px 20px',
+
+    },
+    title: {
+        fontSize: '26px',
+        fontWeight: '700',
+        color: '#fff',
+        letterSpacing: '-0.5px',
+        margin: 0                   // Xóa margin mặc định để căn chỉnh chuẩn hơn
+    },
+    subtitle: {
+        fontSize: '14px',
+        color: '#94a3b8',
+        marginTop: '6px',
+        marginBottom: 0
+    },
     createBtn: {
-        padding: '9px 18px', background: '#185FA5', color: '#fff',
-        border: 'none', borderRadius: '8px', fontSize: '13px',
-        fontWeight: '500', cursor: 'pointer'
+        padding: '10px 20px',
+        background: 'linear-gradient(135deg, #38bdf8 0%, #1d4ed8 100%)',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '10px',
+        fontSize: '14px',
+        fontWeight: '600',
+        cursor: 'pointer',
+        boxShadow: '0 4px 15px rgba(56, 189, 248, 0.4)',
+        whiteSpace: 'nowrap',       // Đảm bảo chữ trong nút không bị xuống dòng
+        height: 'fit-content'       // Nút tự co giãn theo nội dung
     },
     statsRow: {
         display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
         gap: '12px', marginBottom: '20px'
     },
+    // Thêm vào styles trong PondListPage.js
     statCard: {
-        background: '#fff', borderRadius: '10px',
-        padding: '16px 20px', border: '1px solid #e8e8e8'
+        background: 'rgba(255, 255, 255, 0.03)',
+        backdropFilter: 'blur(12px)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        borderRadius: '20px',
+        padding: '24px',
+        display: 'flex',
+        flexDirection: 'row', // Đổi thành row để icon nằm bên cạnh số
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        transition: 'all 0.3s ease',
     },
-    statVal: { fontSize: '26px', fontWeight: '600', lineHeight: 1 },
-    statLabel: { fontSize: '12px', color: '#888', marginTop: '4px' },
+    statVal: {
+        fontSize: '32px',
+        fontWeight: '800',
+        marginBottom: '4px',
+        // Thêm hiệu ứng phát sáng cho con số
+        textShadow: '0 0 15px currentColor',
+    },
+    statIcon: {
+        fontSize: '30px',
+        background: 'rgba(255, 255, 255, 0.05)',
+        padding: '12px',
+        borderRadius: '15px',
+        marginLeft: '15px'
+    },
+    statLabel: { fontSize: '12px', color: '#94a3b8', fontWeight: '500', textTransform: 'uppercase' },
     grid: {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
@@ -184,5 +322,71 @@ const styles = {
         background: '#fff', borderRadius: '12px', border: '1px solid #e8e8e8'
     },
     emptyIcon: { fontSize: '48px', marginBottom: '12px' },
-    emptyText: { fontSize: '15px', color: '#888', marginBottom: '16px' }
+    emptyText: { fontSize: '15px', color: '#888', marginBottom: '16px' },
+    statsRow: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', // Tự động xuống hàng nếu màn hình nhỏ
+        gap: '20px',
+        marginBottom: '30px'
+    },
+    grid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', // Đảm bảo card có độ rộng hợp lý
+        gap: '20px'
+    },
+    emptyContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '80px 20px',
+        textAlign: 'center',
+        background: 'rgba(255, 255, 255, 0.02)',
+        borderRadius: '30px',
+        border: '1px dashed rgba(255, 255, 255, 0.1)', // Viền nét đứt tạo cảm giác "chỗ này đang đợi bạn điền vào"
+        marginTop: '20px',
+    },
+    emptyIllustration: {
+        position: 'relative',
+        marginBottom: '24px',
+    },
+    emptyCircle: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        width: '140px', // To hơn emoji
+        height: '140px',
+        background: 'radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%)',
+        borderRadius: '50%',
+        zIndex: 1,
+    },
+    emptyEmoji: {
+        fontSize: '80px', // Cho to hẳn lên nhìn rất "cuốn"
+        userSelect: 'none',
+    },
+    emptyTitle: {
+        fontSize: '24px',
+        fontWeight: '700',
+        color: '#f8fafc',
+        margin: '0 0 12px 0',
+    },
+    emptySubText: {
+        fontSize: '16px',
+        color: '#94a3b8',
+        lineHeight: '1.6',
+        marginBottom: '32px',
+    },
+    createBtnLarge: {
+        padding: '14px 32px',
+        background: 'linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%)',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '15px',
+        fontSize: '16px',
+        fontWeight: '700',
+        cursor: 'pointer',
+        boxShadow: '0 10px 20px rgba(14, 165, 233, 0.2)',
+        transition: 'all 0.3s ease',
+    },
+
 };
