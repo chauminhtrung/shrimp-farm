@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar';
 import PondCard from '../components/PondCard';
 import CreatePondModal from '../components/CreatePondModal';
 import DashboardHeader from "../components/DashboardHeader"
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PondListPage() {
     const { user } = useAuth();
@@ -13,7 +14,38 @@ export default function PondListPage() {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [totalAlerts, setTotalAlerts] = useState(0);
+    const [filterStatus, setFilterStatus] = useState('Tất cả');
 
+    const [searchQuery, setSearchQuery] = useState('');
+
+
+
+
+    const getStatus = (pond) => {
+        const sensor = pond.latestSensor;
+        if (!sensor) return 'Chưa có dữ liệu';
+
+        // Logic cảnh báo (Trung có thể tùy chỉnh chỉ số này)
+        const isAlert = sensor.oxygen < 4 || sensor.ph < 6.5 || sensor.ph > 8.5;
+        return isAlert ? 'Cảnh báo' : 'Bình thường';
+    };
+
+
+
+
+    const countNormal = ponds.filter(p => getStatus(p) === 'Bình thường').length;
+    const countAlert = ponds.filter(p => getStatus(p) === 'Cảnh báo').length;
+    const countNoData = ponds.filter(p => getStatus(p) === 'Chưa có dữ liệu').length;
+
+    const filteredPonds = ponds.filter(pond => {
+        // Khớp theo Filter Chip (Trạng thái)
+        const matchesStatus = filterStatus === 'Tất cả' || getStatus(pond) === filterStatus;
+
+        // Khớp theo Search Query (Tên ao)
+        const matchesSearch = pond.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+        return matchesStatus && matchesSearch;
+    });
 
     const skeletonStyle = `
   @keyframes shimmer {
@@ -63,15 +95,31 @@ export default function PondListPage() {
     // Load danh sách ao
     const fetchPonds = async () => {
         try {
+            setLoading(true);
             const res = await api.get(`/api/ponds?userId=${user.userId}`);
-            setPonds(res.data);
-            fetchTotalAlerts(res.data); // thêm dòng này
+            const pondList = res.data;
+
+            // Gọi thêm API lấy sensor data cho từng ao
+            const pondsWithSensor = await Promise.all(
+                pondList.map(async (pond) => {
+                    try {
+                        const sensorRes = await api.get(`/api/sensor/latest/${pond.id}`);
+                        return { ...pond, latestSensor: sensorRes.data };
+                    } catch {
+                        return { ...pond, latestSensor: null };
+                    }
+                })
+            );
+
+            setPonds(pondsWithSensor);
+            fetchTotalAlerts(pondsWithSensor);
         } catch (err) {
             toast.error('Không thể tải danh sách ao');
         } finally {
             setLoading(false);
         }
     };
+
     const fetchTotalAlerts = async (pondList) => {
         try {
             let total = 0;
@@ -136,8 +184,34 @@ export default function PondListPage() {
                 <DashboardHeader
                     userName="Trung"
                     totalPonds={ponds.length}
-                    alertPonds={ponds.filter(p => p.status === 'Cảnh báo').length}
+                    alertPonds={ponds.filter(p => getStatus(p) === 'Cảnh báo').length}
+                    onAddClick={() => setShowModal(true)}
+                    searchQuery={searchQuery}          // Truyền state
+                    onSearchChange={setSearchQuery}    // Truyền function cập nhật
                 />
+
+                <div style={styles.filterContainer}>
+                    {['Tất cả', 'Bình thường', 'Cảnh báo', 'Chưa có dữ liệu'].map((status) => (
+                        <button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            key={status}
+                            onClick={() => setFilterStatus(status)}
+                            style={{
+                                ...styles.filterChip,
+                                ...(filterStatus === status ? styles.activeChip : styles.inactiveChip)
+                            }}
+                        >
+                            {status}
+                            <span style={styles.chipCount}>
+                                {status === 'Tất cả' && ponds.length}
+                                {status === 'Bình thường' && countNormal}
+                                {status === 'Cảnh báo' && countAlert}
+                                {status === 'Chưa có dữ liệu' && countNoData}
+                            </span>
+                        </button>
+                    ))}
+                </div>
 
                 {/* Stats */}
                 <div style={styles.statsRow}>
@@ -212,9 +286,25 @@ export default function PondListPage() {
                     ) : (
                         // 3. Trạng thái có dữ liệu: Hiện danh sách ao
                         <div style={styles.grid}>
-                            {ponds.map(pond => (
-                                <PondCard key={pond.id} pond={pond} onDelete={handleDelete} />
-                            ))}
+                            <AnimatePresence mode='popLayout'>
+                                {filteredPonds.map((pond) => (
+                                    <motion.div
+                                        key={pond.id} // Quan trọng: key phải là duy nhất
+                                        layout // Tự động di chuyển các card còn lại vào chỗ trống mượt mà
+                                        initial={{ opacity: 0, scale: 0.9, y: 20 }} // Trạng thái khi mới xuất hiện
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}    // Trạng thái hiển thị
+                                        exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }} // Khi bị lọc mất
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 500,
+                                            damping: 30,
+                                            opacity: { duration: 0.2 }
+                                        }}
+                                    >
+                                        <PondCard pond={pond} onDelete={handleDelete} />
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
                         </div>
                     )}
                 </div>
@@ -388,5 +478,41 @@ const styles = {
         boxShadow: '0 10px 20px rgba(14, 165, 233, 0.2)',
         transition: 'all 0.3s ease',
     },
+    filterContainer: {
+        display: 'flex',
+        gap: '12px',
+        marginBottom: '25px',
+        padding: '0 10px',
+        flexWrap: 'wrap'
+    },
+    filterChip: {
+        padding: '10px 20px',
+        borderRadius: '12px',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        cursor: 'pointer',
+        fontSize: '14px',
+        fontWeight: '600',
+        transition: 'all 0.3s ease',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        backdropFilter: 'blur(10px)',
+    },
+    activeChip: {
+        background: 'linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%)',
+        color: '#fff',
+        boxShadow: '0 4px 15px rgba(14, 165, 233, 0.3)',
+        border: 'none',
+    },
+    inactiveChip: {
+        background: 'rgba(255, 255, 255, 0.05)',
+        color: '#94a3b8',
+    },
+    chipCount: {
+        background: 'rgba(0, 0, 0, 0.2)',
+        padding: '2px 8px',
+        borderRadius: '6px',
+        fontSize: '12px',
+    }
 
 };

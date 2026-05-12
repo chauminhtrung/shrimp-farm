@@ -31,7 +31,7 @@ public class SensorDataService {
     public SensorData getLatest(Long pondId) {
         return sensorDataRepository
                 .findTopByPondIdOrderByRecordedAtDesc(pondId)
-                .orElseThrow(() -> new RuntimeException("No sensor data for pond: " + pondId));
+                .orElse(null); // Trả về null thay vì ném lỗi
     }
 
     // Nhận dữ liệu từ ESP32 hoặc simulator — tự động kiểm tra ngưỡng
