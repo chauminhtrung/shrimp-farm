@@ -22,33 +22,39 @@ export default function PondDetailPage() {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
     const styles = {
-    container: { maxWidth: '1200px', margin: '0 auto', padding: '20px' },
-    // Sửa trong đối tượng styles ở cuối file
+        container: {
+            maxWidth: '1200px',
+            margin: '0 auto',
+            paddingLeft: '20px',
+            paddingRight: '20px',
+            paddingTop: '87px',
+            paddingBottom: '19px'
+        },
     header: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: isMobile ? 'stretch' : 'flex-start', // Stretch để nút dài ra trên mobile
-        flexDirection: isMobile ? 'column' : 'row',    // Xuống hàng trên mobile
-        marginBottom: '20px',
-        gap: '15px'
-    },
-    headerLeft: { display: 'flex', alignItems: 'center', gap: '14px' },
-    backBtn: {
-        padding: '6px 14px', background: '#E6F1FB',
-        color: '#185FA5', border: '1px solid #B5D4F4',
-        borderRadius: '6px', fontSize: '12px', cursor: 'pointer'
-    },
-    title: { fontSize: '20px', fontWeight: '600', color: '#1a1a1a' },
-    subtitle: { fontSize: '12px', color: '#888', marginTop: '3px' },
-    predictBtn: {
-        padding: '9px 18px', background: '#534AB7',
-        color: '#fff', border: 'none', borderRadius: '8px',
-        fontSize: '13px', fontWeight: '500', cursor: 'pointer'
-    },
-    row2: { display: 'grid', gridTemplateColumns: '1fr 380px', gap: '14px' },
-    leftCol: {},
-    rightCol: { display: 'flex', flexDirection: 'column', gap: '14px' }
-};
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: isMobile ? 'stretch' : 'flex-start', // Stretch để nút dài ra trên mobile
+            flexDirection: isMobile ? 'column' : 'row',    // Xuống hàng trên mobile
+            marginBottom: '20px',
+            gap: '15px'
+        },
+        headerLeft: { display: 'flex', alignItems: 'center', gap: '14px' },
+        backBtn: {
+            padding: '6px 14px', background: '#E6F1FB',
+            color: '#185FA5', border: '1px solid #B5D4F4',
+            borderRadius: '6px', fontSize: '12px', cursor: 'pointer'
+        },
+        title: { fontSize: '20px', fontWeight: '600', color: '#1a1a1a' },
+        subtitle: { fontSize: '12px', color: '#888', marginTop: '3px' },
+        predictBtn: {
+            padding: '9px 18px', background: '#534AB7',
+            color: '#fff', border: 'none', borderRadius: '8px',
+            fontSize: '13px', fontWeight: '500', cursor: 'pointer'
+        },
+        row2: { display: 'grid', gridTemplateColumns: '1fr 380px', gap: '14px' },
+        leftCol: {},
+        rightCol: { display: 'flex', flexDirection: 'column', gap: '14px' }
+    };
 
 
     useEffect(() => {

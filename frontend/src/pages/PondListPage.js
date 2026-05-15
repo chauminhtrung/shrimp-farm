@@ -340,7 +340,9 @@ const styles = {
         width: '100%'               // Đảm bảo header chiếm hết chiều ngang container
     },
     container: {
-        maxWidth: '1200px', margin: '0 auto', padding: '30px 20px',
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: '100px 20px 30px 20px',
 
     },
     title: {

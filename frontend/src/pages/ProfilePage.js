@@ -149,6 +149,7 @@ export default function ProfilePage() {
     return (
         <div style={styles.page}>
             <Navbar />
+            
             <div style={styles.layoutWrapper}>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -461,7 +462,8 @@ const styles = {
         backgroundSize: '40px 40px',
         color: '#fff',
         fontFamily: "'Inter', sans-serif",
-        paddingBottom: '50px'
+        paddingBottom: '50px',
+        paddingTop: '50px', // Khoảng cách này giúp trang không bị Navbar che mất
     },
     layoutWrapper: {
         display: 'flex',
