@@ -8,6 +8,7 @@ import PondMap from '../components/PondMap';
 import AIPanel from '../components/AIPanel';
 import AlertPanel from '../components/AlertPanel';
 import SensorChart from '../components/SensorChart';
+import { motion, AnimatePresence } from 'framer-motion';
 export default function PondDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -177,7 +178,14 @@ export default function PondDetailPage() {
     );
 
     return (
-        <div className="app-container">
+               <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+           className="app-container"
+        >
+       
             <Navbar />
             <div style={styles.container}>
 
@@ -232,7 +240,7 @@ export default function PondDetailPage() {
                 </div>
 
             </div>
-        </div>
+ </motion.div>
     );
 }
 

@@ -1,10 +1,21 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion'; 
 
 export default function LandingPage() {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const [isTransitioning, setIsTransitioning] = useState(false); // State kích hoạt hiệu ứng điện ảnh
 
+
+    const handleDashboardNavigation = () => {
+        setIsTransitioning(true);
+        // Chờ 800ms cho hiệu ứng đen màn hình chạy xong rồi mới chuyển trang
+        setTimeout(() => {
+            navigate('/ponds');
+        }, 800);
+    };
     const features = [
         {
             icon: '🌡️',
@@ -47,14 +58,25 @@ export default function LandingPage() {
 
     const thresholds = [
         { param: 'Nhiệt độ', safe: '25 – 32°C', icon: '🌡️' },
-        { param: 'pH',       safe: '6.5 – 8.5', icon: '⚗️' },
+        { param: 'pH', safe: '6.5 – 8.5', icon: '⚗️' },
         { param: 'Oxy hòa tan', safe: '> 4.0 mg/L', icon: '💧' },
-        { param: 'Độ đục',   safe: '0 – 5 NTU', icon: '🌊' },
+        { param: 'Độ đục', safe: '0 – 5 NTU', icon: '🌊' },
     ];
 
     return (
-        <div style={styles.page}>
-
+     <motion.div 
+            // HIỆU ỨNG MỞ TRANG (LOAD PAGE)
+            initial={{ opacity: 0 }}       // Ban đầu ẩn hoàn toàn (Màn hình trắng/trống)
+            animate={{ opacity: 1 }}       // Từ từ hiện rõ lên
+            transition={{ duration: 1, ease: 'easeInOut' }} // Chạy mượt trong 1 giây
+            style={styles.page}
+        >
+            {/* LỚP PHỦ ĐIỆN ẢNH (CINEMATIC OVERLAY) */}
+            <div style={{
+                ...styles.cinematicOverlay,
+                opacity: isTransitioning ? 1 : 0,
+                pointerEvents: isTransitioning ? 'all' : 'none',
+            }} />
             {/* NAVBAR */}
             <nav style={styles.nav}>
                 <div style={styles.navInner}>
@@ -68,7 +90,7 @@ export default function LandingPage() {
                         {user ? (
                             <button
                                 style={styles.btnPrimary}
-                                onClick={() => navigate('/ponds')}
+                                onClick={handleDashboardNavigation}
                             >
                                 Vào Dashboard →
                             </button>
@@ -270,9 +292,9 @@ export default function LandingPage() {
                         © 2026 AquaMonitor — Đồ án tốt nghiệp
                     </div>
                 </div>
-            </footer>
+            </footer>   
 
-        </div>
+      </motion.div>
     );
 }
 
@@ -447,6 +469,18 @@ const styles = {
         color: '#185FA5', border: 'none',
         borderRadius: '10px', fontSize: '15px',
         fontWeight: '600', cursor: 'pointer'
+    },
+
+    cinematicOverlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        background: '#0B0F19', // Màu nền tối trùng với trang PondListPage của bạn
+        zIndex: 9999,
+        transition: 'opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)', // Hiệu ứng mượt cinematic
+        pointerEvents: 'none',
     },
 
     // Footer

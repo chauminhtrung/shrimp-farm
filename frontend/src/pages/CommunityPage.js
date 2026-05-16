@@ -7,6 +7,8 @@ import CommunityNavbar from '../components/CommunityNavbar';
 import CreatePostModal from '../components/CreatePostModal';
 import { getAvatarColor, getAvatarLetter, getAvatarSrc } from '../utils/avatarHelper';
 import Avatar from '../components/Avatar';
+import { motion } from 'framer-motion'; 
+
 const TAGS = [
     { key: null, label: '🌊 Tất cả' },
     { key: 'EXPERIENCE', label: '💡 Kinh nghiệm' },
@@ -91,7 +93,13 @@ export default function CommunityPage() {
     };
 
     return (
-        <div style={styles.page}>
+           <motion.div 
+                  // HIỆU ỨNG MỞ TRANG (LOAD PAGE)
+                  initial={{ opacity: 0 }}       // Ban đầu ẩn hoàn toàn (Màn hình trắng/trống)
+                  animate={{ opacity: 1 }}       // Từ từ hiện rõ lên
+                  transition={{ duration: 1, ease: 'easeInOut' }} // Chạy mượt trong 1 giây
+                  style={styles.page}
+              >
             <CommunityNavbar />
 
             <div style={styles.container}>
@@ -355,7 +363,7 @@ export default function CommunityPage() {
                     onCreate={handleCreate}
                 />
             )}
-        </div>
+     </motion.div>
     );
 }
 
