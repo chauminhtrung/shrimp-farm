@@ -369,7 +369,7 @@ export default function CommunityPage() {
 
 const styles = {
     page: { minHeight: '100vh', background: '#f0f4f8' },
-    container: { maxWidth: '1100px', margin: '0 auto', padding: '24px 20px' },
+    container: { maxWidth: '1100px', margin: '0 auto', padding: '100px 20px 30px 20px',},
     layout: { display: 'grid', gridTemplateColumns: '1fr 280px', gap: '20px' },
     main: {},
     header: {
