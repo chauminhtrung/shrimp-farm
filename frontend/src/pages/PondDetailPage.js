@@ -31,7 +31,7 @@ export default function PondDetailPage() {
             paddingTop: '87px',
             paddingBottom: '19px'
         },
-    header: {
+        header: {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: isMobile ? 'stretch' : 'flex-start', // Stretch để nút dài ra trên mobile
@@ -178,20 +178,20 @@ export default function PondDetailPage() {
     );
 
     return (
-               <motion.div 
+        <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
-           className="app-container"
+            className="app-container"
         >
-       
+
             <Navbar />
             <div style={styles.container}>
 
                 {/* Header - Giữ nguyên vị trí cũ */}
                 <div style={styles.header}>
-                    <div style={styles.headerLeft}>
+                    <div style={styles.headerLeft}> 
                         <button className="modern-back-btn" onClick={() => navigate('/ponds')}>
                             ← Quay lại
                         </button>
@@ -204,6 +204,13 @@ export default function PondDetailPage() {
                     </div>
                     <button className="modern-predict-btn" onClick={handlePredict}>
                         🤖 Chạy AI dự đoán
+                    </button>
+                    <button
+                        className="modern-predict-btn"
+                        onClick={() => navigate(`/ponds/${id}/map`)}
+                        style={{ background: 'linear-gradient(135deg, #0f6e56 0%, #1D9E75 100%)' }}
+                    >
+                        🗺 Xem Pond Map
                     </button>
                 </div>
 
@@ -240,7 +247,7 @@ export default function PondDetailPage() {
                 </div>
 
             </div>
- </motion.div>
+        </motion.div>
     );
 }
 

@@ -10,6 +10,7 @@ import CommunityPage from './pages/CommunityPage';
 import PostDetailPage from './pages/PostDetailPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
+import PondMapPage from './pages/PondMapPage';
 
 
 function PrivateRoute({ children }) {
@@ -28,8 +29,8 @@ function App() {
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/community" element={<CommunityPage />} />
                     <Route path="/profile" element={
-                    <PrivateRoute><ProfilePage /></PrivateRoute>
-                } />
+                        <PrivateRoute><ProfilePage /></PrivateRoute>
+                    } />
 
                     <Route path="/community/:id" element={<PostDetailPage />} />
                     <Route path="/ponds" element={
@@ -38,7 +39,7 @@ function App() {
                     <Route path="/ponds/:id" element={
                         <PrivateRoute><PondDetailPage /></PrivateRoute>
                     } />
-
+                    <Route path="/ponds/:id/map" element={<PondMapPage />} />
                     // Thêm route — chỉ Admin mới vào được
                     <Route path="/admin" element={
                         <PrivateRoute><AdminPage /></PrivateRoute>
